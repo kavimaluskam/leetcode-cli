@@ -1,89 +1,51 @@
-// Command click is a chromedp example demonstrating how to use a selector to
-// click on an element.
 package main
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"log"
+	"errors"
+	"fmt"
+	"io"
+	"net"
 	"os"
-	"time"
+	"strings"
 
-	"github.com/go-rod/rod"
-	"github.com/go-rod/rod/lib/input"
-	"github.com/joho/godotenv"
+	"github.com/kavimaluskam/leetcode-cli/cmd"
+	"github.com/kavimaluskam/leetcode-cli/pkg/cmd/util"
+	"github.com/spf13/cobra"
 )
 
-type auth struct {
-	Login       string `json:"login"`
-	LoginCSRF   string `json:"loginCSRF"`
-	SessionCSRF string `json:"sessionCSRF"`
-	SessionID   string `json:"sessionId"`
-}
-
-func login(username string, password string) (csrftoken string, sessionID string) {
-	// Launch a new browser with default options, and connect to it.
-	browser := rod.New().Connect()
-
-	// Even you forget to close, rod will close it after main process ends.
-	defer browser.Close()
-
-	// Timeout will be passed to all chained function calls.
-	// The code will panic out if any chained call is used after the timeout.
-	page := browser.Timeout(time.Minute).Page(`https://leetcode.com/accounts/login/`)
-
-	// Resize the window make sure window size is always consistent.
-	page.Window(0, 0, 1200, 600)
-
-	page.Element(`#signin_btn`).WaitVisible()
-
-	page.Element(`#id_login`).Input(username)
-	page.Element(`#id_password`).Input(password).Press(input.Enter)
-
-	page.Element(`#nav-user-app`).WaitVisible()
-
-	for _, cookie := range page.Cookies() {
-		if cookie.Name == `csrftoken` {
-			csrftoken = cookie.Value
-		} else if cookie.Name == `LEETCODE_SESSION` {
-			sessionID = cookie.Value
-		}
-	}
-
-	return csrftoken, sessionID
-}
+var updaterEnabled = ""
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	hasDebug := os.Getenv("DEBUG") != ""
+
+	if cmd, err := cmd.RootCmd.ExecuteC(); err != nil {
+		printError(os.Stderr, err, cmd, hasDebug)
+		os.Exit(1)
 	}
+}
 
-	username := os.Getenv("LEETCODE_USERNAME")
-	password := os.Getenv("LEETCODE_PASSWORD")
-	authConfigPath := os.Getenv("LEETCODE_CONFIG_PATH")
-
-	log.Printf("Signing in leetcode...")
-	csrftoken, sessionID := login(username, password)
-
-	data := auth{
-		Login:       username,
-		LoginCSRF:   ``,
-		SessionCSRF: csrftoken,
-		SessionID:   sessionID,
-	}
-
-	file, err := json.Marshal(data)
-	if err != nil {
-		log.Panicf(`Error on processing authencation json: %s`, err.Error())
+func printError(out io.Writer, err error, cmd *cobra.Command, debug bool) {
+	if err == util.SilentError {
 		return
 	}
 
-	err = ioutil.WriteFile(authConfigPath, file, os.ModePerm)
-	if err != nil {
-		log.Panicf(`Error on writing authencation json to path %s: %s`, authConfigPath, err.Error())
+	var dnsError *net.DNSError
+	if errors.As(err, &dnsError) {
+		fmt.Fprintf(out, "error connecting to %s\n", dnsError.Name)
+		if debug {
+			fmt.Fprintln(out, dnsError)
+		}
+		fmt.Fprintln(out, "check your internet connection or leetcode.com")
 		return
 	}
 
-	log.Printf("Successfully signed in as %s", username)
+	fmt.Fprintln(out, err)
+
+	var flagError *util.FlagError
+	if errors.As(err, &flagError) || strings.HasPrefix(err.Error(), "unknown command ") {
+		if !strings.HasSuffix(err.Error(), "\n") {
+			fmt.Fprintln(out)
+		}
+		fmt.Fprintln(out, cmd.UsageString())
+	}
 }
