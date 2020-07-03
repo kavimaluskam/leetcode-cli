@@ -12,6 +12,7 @@ import (
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/input"
 	"github.com/kavimaluskam/leetcode-cli/pkg/cmd/util"
+	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 )
@@ -102,7 +103,7 @@ func login(username string, password string) (csrfToken string, sessionID string
 
 	// Timeout will be passed to all chained function calls.
 	// The code will panic out if any chained call is used after the timeout.
-	page := browser.Timeout(time.Minute).Page("https://leetcode.com/accounts/login/")
+	page := browser.Timeout(time.Minute).Page(utils.LoginURL)
 
 	// Resize the window make sure window size is always consistent.
 	page.Window(0, 0, 1200, 600)
