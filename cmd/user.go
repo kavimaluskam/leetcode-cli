@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/input"
+	"github.com/kavimaluskam/leetcode-cli/pkg/api"
 	"github.com/kavimaluskam/leetcode-cli/pkg/cmd/util"
 	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -56,7 +57,7 @@ func userSignIn(cmd *cobra.Command, args []string) error {
 	fmt.Printf("Loggin into leetcode as %s...\n", username)
 	csrfToken, sessionID := login(username, passwordStr)
 
-	data := auth{
+	data := api.Auth{
 		Login:       username,
 		LoginCSRF:   "",
 		SessionCSRF: csrfToken,
@@ -83,13 +84,6 @@ func userSignOut(cmd *cobra.Command, args []string) error {
 	fmt.Println("User sign out!")
 
 	return nil
-}
-
-type auth struct {
-	Login       string `json:"login"`
-	LoginCSRF   string `json:"loginCSRF"`
-	SessionCSRF string `json:"sessionCSRF"`
-	SessionID   string `json:"sessionId"`
 }
 
 func login(username string, password string) (csrfToken string, sessionID string) {
