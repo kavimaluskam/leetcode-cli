@@ -53,6 +53,26 @@ func (p Problem) GetDiffculty(format string) string {
 	}
 }
 
+// GetStatus is a mapper function from problem status to emoji
+func (p Problem) GetStatus() string {
+	switch p.Status {
+	case "ac": // Problem approved
+		return emoji.Sprint(":heavy_check_mark: ")
+	case "notac": // Problem WIP
+		return emoji.Sprint(":question:")
+	default:
+		return "   "
+	}
+}
+
+// GetIsFavor is a mapper function from `is_favor` status to emoji
+func (p Problem) GetIsFavor() string {
+	if p.IsFavor {
+		return emoji.Sprint(":heart: ")
+	}
+	return "   "
+}
+
 // GetLockedStatus is a mapper function from `paid_only` status to emoji
 func (p Problem) GetLockedStatus() string {
 	if p.PaidOnly {
@@ -62,7 +82,7 @@ func (p Problem) GetLockedStatus() string {
 }
 
 // GetProblemCollection is the query function fetching LeetCode Problem List
-func (client *Client) GetProblemCollection(category string, query string) (*ProblemCollection, error) {
+func (client *Client) GetProblemCollection(category string, query string, name string) (*ProblemCollection, error) {
 	var problemCollection ProblemCollection
 	var problemIDList []int
 
@@ -73,6 +93,20 @@ func (client *Client) GetProblemCollection(category string, query string) (*Prob
 		return nil, err
 	}
 
+	// filter problems by name
+	if name != "" {
+		name = strings.ToLower(name)
+		var queriedProblems []Problem
+
+		for _, problem := range problemCollection.Problems {
+			if strings.Contains(strings.ToLower(problem.Stat.QuestionTitle), name) {
+				queriedProblems = append(queriedProblems, problem)
+			}
+		}
+		problemCollection.Problems = queriedProblems
+	}
+
+	// filter problems by queried IDs
 	if query != "" {
 		queryURL := strings.Replace(utils.ProblemQueryURL, "$query", query, 1)
 

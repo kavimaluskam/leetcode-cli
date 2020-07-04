@@ -11,6 +11,7 @@ func init() {
 	RootCmd.AddCommand(listCmd)
 	listCmd.Flags().StringP("category", "c", "all", "problem categories: {''|all|algorithms|database|shell}")
 	listCmd.Flags().StringP("query", "q", "", "problem query string")
+	listCmd.Flags().StringP("name", "n", "", "problem name query")
 }
 
 var listCmd = &cobra.Command{
@@ -26,19 +27,28 @@ func list(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	name, err := cmd.Flags().GetString("name")
+	if err != nil {
+		return err
+	}
+
 	query, err := cmd.Flags().GetString("query")
 	if err != nil {
 		return err
 	}
 
-	client := api.NewClient()
+	client, err := api.GetAuthClient()
+	if err != nil {
+		return err
+	}
+
 	var problemCollection *api.ProblemCollection
 
 	switch category {
 	case "all":
-		problemCollection, err = client.GetProblemCollection("all", query)
+		problemCollection, err = client.GetProblemCollection("all", query, name)
 	case "algorithms", "database", "shell":
-		problemCollection, err = client.GetProblemCollection(category, query)
+		problemCollection, err = client.GetProblemCollection(category, query, name)
 	default:
 		return fmt.Errorf("unsupported category %s", category)
 	}
@@ -48,8 +58,10 @@ func list(cmd *cobra.Command, args []string) error {
 
 	for _, problem := range problemCollection.Problems {
 		fmt.Printf(
-			"%s [%4d] %-60s %s (%.2f %%)\n",
+			"%2s%2s%2s [%4d] %-60s %s (%.2f %%)\n",
 			problem.GetLockedStatus(),
+			problem.GetIsFavor(),
+			problem.GetStatus(),
 			problem.Stat.QuestionID,
 			problem.Stat.QuestionTitle,
 			problem.GetDiffculty("%-6s"),
