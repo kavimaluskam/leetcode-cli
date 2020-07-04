@@ -17,8 +17,6 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-var authConfigPath = fmt.Sprintf("%s/.lc/leetcode/user.json", os.Getenv("HOME"))
-
 func init() {
 	RootCmd.AddCommand(userCmd)
 	userCmd.AddCommand(userSignInCmd)
@@ -71,7 +69,7 @@ func userSignIn(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(authConfigPath, file, os.ModePerm)
+	err = ioutil.WriteFile(utils.AuthConfigPath, file, os.ModePerm)
 	if err != nil {
 		return err
 	}
