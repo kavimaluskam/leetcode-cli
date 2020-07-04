@@ -7,6 +7,7 @@ import (
 	"github.com/kyokomi/emoji"
 )
 
+// ProblemCollection is the response from leetcode API concerning problem set
 type ProblemCollection struct {
 	Username  string    `json:"user_name"`
 	NumSolved int       `json:"num_solved"`
@@ -17,6 +18,7 @@ type ProblemCollection struct {
 	Problems  []Problem `json:"stat_status_pairs"`
 }
 
+// Problem is the response from leetcode API concerning individual problems
 type Problem struct {
 	Stat struct {
 		QuestionID          int    `json:"question_id"`
@@ -40,14 +42,14 @@ type Problem struct {
 }
 
 // GetDiffculty is a mapper function from problem diffculty level to string
-func (p Problem) GetDiffculty() string {
+func (p Problem) GetDiffculty(format string) string {
 	switch p.Diffculty.Level {
 	case 1:
-		return "Easy"
+		return utils.GreenFormatted("Easy", format)
 	case 2:
-		return "Medium"
+		return utils.YellowFormatted("Medium", format)
 	default:
-		return "Hard"
+		return utils.RedFormatted("Hard", format)
 	}
 }
 
@@ -60,7 +62,7 @@ func (p Problem) GetLockedStatus() string {
 }
 
 // GetProblemCollection is the query function fetching LeetCode Problem List
-func GetProblemCollection(client *Client, category string, query string) (*ProblemCollection, error) {
+func (client *Client) GetProblemCollection(category string, query string) (*ProblemCollection, error) {
 	var problemCollection ProblemCollection
 	var problemIDList []int
 

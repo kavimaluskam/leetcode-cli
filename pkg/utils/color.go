@@ -1,60 +1,44 @@
 package utils
 
 import (
-	"io"
-	"os"
+	"fmt"
 
-	"github.com/mattn/go-colorable"
-	"github.com/mattn/go-isatty"
 	"github.com/mgutz/ansi"
 )
 
+// Outputs ANSI color if stdout is a tty
 var (
-	_isStdoutTerminal, checkedTerminal bool
-
-	// Outputs ANSI color if stdout is a tty
-	Magenta = makeColorFunc("magenta")
-	Cyan    = makeColorFunc("cyan")
-	Red     = makeColorFunc("red")
-	Yellow  = makeColorFunc("yellow")
-	Blue    = makeColorFunc("blue")
-	Green   = makeColorFunc("green")
-	Gray    = makeColorFunc("black+h")
-	Bold    = makeColorFunc("default+b")
+	Magenta          = makeColorFunc("magenta")
+	MagentaFormatted = makeColorFuncFormatted("magenta")
+	Cyan             = makeColorFunc("cyan")
+	CyanFormatted    = makeColorFuncFormatted("cyan")
+	Red              = makeColorFunc("red")
+	RedFormatted     = makeColorFuncFormatted("red")
+	Yellow           = makeColorFunc("yellow")
+	YellowFormatted  = makeColorFuncFormatted("yellow")
+	Blue             = makeColorFunc("blue")
+	BlueFormatted    = makeColorFuncFormatted("blue")
+	Green            = makeColorFunc("green")
+	GreenFormatted   = makeColorFuncFormatted("green")
+	Gray             = makeColorFunc("black+h")
+	GrayFormatted    = makeColorFuncFormatted("black+h")
+	Bold             = makeColorFunc("default+b")
+	BoldFormatted    = makeColorFuncFormatted("default+b")
 )
-
-func isStdoutTerminal() bool {
-	if !checkedTerminal {
-		_isStdoutTerminal = IsTerminal(os.Stdout)
-		checkedTerminal = true
-	}
-	return _isStdoutTerminal
-}
-
-// IsTerminal reports whether the file descriptor is connected to a terminal
-func IsTerminal(f *os.File) bool {
-	return isatty.IsTerminal(f.Fd()) || isatty.IsCygwinTerminal(f.Fd())
-}
-
-// NewColorable returns an output stream that handles ANSI color sequences on Windows
-func NewColorable(f *os.File) io.Writer {
-	return colorable.NewColorable(f)
-}
 
 func makeColorFunc(color string) func(string) string {
 	cf := ansi.ColorFunc(color)
 	return func(arg string) string {
-		if isColorEnabled() {
-			return cf(arg)
-		}
-		return arg
+		return cf(arg)
 	}
 }
 
-func isColorEnabled() bool {
-	if os.Getenv("NO_COLOR") != "" {
-		return false
+func makeColorFuncFormatted(color string) func(string, string) string {
+	cf := ansi.ColorFunc(color)
+	return func(arg string, format string) string {
+		if format != "" {
+			return cf(fmt.Sprintf(format, arg))
+		}
+		return cf(arg)
 	}
-
-	return isStdoutTerminal()
 }

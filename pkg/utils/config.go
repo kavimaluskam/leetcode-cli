@@ -1,5 +1,10 @@
 package utils
 
+import (
+	"fmt"
+	"os"
+)
+
 // URLs supported by LeetCode api
 const (
 	BaseURL           = "https://leetcode.com"
@@ -16,4 +21,8 @@ const (
 	VerifyURL         = "https://leetcode.com/submissions/detail/$id/check/"
 	FavoritesURL      = "https://leetcode.com/list/api/questions"
 	FavoriteDeleteURL = "https://leetcode.com/list/api/questions/$hash/$id"
+)
+
+var (
+	AuthConfigPath = fmt.Sprintf("%s/.lc/leetcode/user.json", os.Getenv("HOME"))
 )

@@ -36,9 +36,9 @@ func list(cmd *cobra.Command, args []string) error {
 
 	switch category {
 	case "all":
-		problemCollection, err = api.GetProblemCollection(client, "all", query)
+		problemCollection, err = client.GetProblemCollection("all", query)
 	case "algorithms", "database", "shell":
-		problemCollection, err = api.GetProblemCollection(client, category, query)
+		problemCollection, err = client.GetProblemCollection(category, query)
 	default:
 		return fmt.Errorf("unsupported category %s", category)
 	}
@@ -48,11 +48,11 @@ func list(cmd *cobra.Command, args []string) error {
 
 	for _, problem := range problemCollection.Problems {
 		fmt.Printf(
-			"%s [%4d] %-60s %-6s (%.2f %%)\n",
+			"%s [%4d] %-60s %s (%.2f %%)\n",
 			problem.GetLockedStatus(),
 			problem.Stat.QuestionID,
 			problem.Stat.QuestionTitle,
-			problem.GetDiffculty(),
+			problem.GetDiffculty("%-6s"),
 			(float64(problem.Stat.TotalAcs) / float64(problem.Stat.TotalSubmitted)),
 		)
 	}

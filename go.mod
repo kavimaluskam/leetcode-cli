@@ -3,6 +3,7 @@ module github.com/kavimaluskam/leetcode-cli
 go 1.14
 
 require (
+	github.com/briandowns/spinner v1.11.1
 	github.com/cli/cli v0.10.1
 	github.com/go-rod/rod v0.43.0
 	github.com/henvic/httpretty v0.0.5
