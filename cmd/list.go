@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/kavimaluskam/leetcode-cli/pkg/api"
 	"github.com/kavimaluskam/leetcode-cli/pkg/arg"
 	"github.com/spf13/cobra"
@@ -43,16 +41,7 @@ func list(cmd *cobra.Command, args []string) error {
 	}
 
 	for _, problem := range problemCollection.Problems {
-		fmt.Printf(
-			"%2s%2s%2s [%4d] %-60s %s (%.2f %%)\n",
-			problem.GetLockStatus(),
-			problem.GetIsFavor(),
-			problem.GetStatus(),
-			problem.Stat.QuestionID,
-			problem.Stat.QuestionTitle,
-			problem.GetDiffculty("%-6s"),
-			(float64(problem.Stat.TotalAcs) / float64(problem.Stat.TotalSubmitted)),
-		)
+		problem.ExportStdoutListing()
 	}
 
 	return nil

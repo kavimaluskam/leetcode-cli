@@ -3,108 +3,19 @@ package api
 import (
 	"strings"
 
+	"github.com/kavimaluskam/leetcode-cli/pkg/model"
 	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
-	"github.com/kyokomi/emoji"
 )
 
 // ProblemCollection is the response from leetcode API concerning problem set
 type ProblemCollection struct {
-	Username  string    `json:"user_name"`
-	NumSolved int       `json:"num_solved"`
-	NumTotal  int       `json:"num_total"`
-	AcEasy    int       `json:"ac_easy"`
-	AcMedium  int       `json:"ac_medium"`
-	AcHard    int       `json:"ac_hard"`
-	Problems  []Problem `json:"stat_status_pairs"`
-}
-
-// Problem is the response from leetcode API concerning individual problems
-type Problem struct {
-	Stat struct {
-		QuestionID          int    `json:"question_id"`
-		QuestionArticleLive bool   `json:"question__article__live"`
-		QuestionArticleSlug string `json:"question__article__slug"`
-		QuestionTitle       string `json:"question__title"`
-		QuestionTitleSlug   string `json:"question__title_slug"`
-		TotalAcs            int    `json:"total_acs"`
-		TotalSubmitted      int    `json:"total_submitted"`
-		FrontendQuestionID  int    `json:"frontend_question_id"`
-		IsNewQuestion       bool   `json:"is_new_question"`
-	} `json:"stat"`
-	Status    string `json:"status"`
-	Diffculty struct {
-		Level int `json:"level"`
-	} `json:"difficulty"`
-	PaidOnly  bool `json:"paid_only"`
-	IsFavor   bool `json:"is_favor"`
-	Frequency int  `json:"frequency"`
-	Progress  int  `json:"progress"`
-}
-
-// GetDiffculty is a mapper function from problem diffculty level to string
-func (p Problem) GetDiffculty(format string) string {
-	switch p.Diffculty.Level {
-	case 1:
-		return utils.GreenFormatted("Easy", format)
-	case 2:
-		return utils.YellowFormatted("Medium", format)
-	default:
-		return utils.RedFormatted("Hard", format)
-	}
-}
-
-// GetStatus is a mapper function from problem status to emoji
-func (p Problem) GetStatus() string {
-	switch p.Status {
-	case "ac": // Problem approved
-		return emoji.Sprint(":heavy_check_mark: ")
-	case "notac": // Problem WIP
-		return emoji.Sprint(":question:")
-	default:
-		return "   "
-	}
-}
-
-// CheckStatus is a switcher function checking problem status with `status` checker
-func (p Problem) CheckStatus(checker string) bool {
-	switch checker {
-	case "approved":
-		return p.Status == "ac"
-	case "rejected":
-		return p.Status == "notac"
-	case "new":
-		return p.Status == ""
-	default:
-		return true
-	}
-}
-
-// GetIsFavor is a mapper function from `is_favor` status to emoji
-func (p Problem) GetIsFavor() string {
-	if p.IsFavor {
-		return emoji.Sprint(":heart: ")
-	}
-	return "   "
-}
-
-// GetLockStatus is a mapper function from `paid_only` status to emoji
-func (p Problem) GetLockStatus() string {
-	if p.PaidOnly {
-		return emoji.Sprint(":locked:")
-	}
-	return "   "
-}
-
-// CheckLockStatus is a switcher function checking `paid_only` with `lock` checker
-func (p Problem) CheckLockStatus(checker string) bool {
-	switch checker {
-	case "locked":
-		return p.PaidOnly
-	case "free":
-		return !p.PaidOnly
-	default:
-		return true
-	}
+	Username  string          `json:"user_name"`
+	NumSolved int             `json:"num_solved"`
+	NumTotal  int             `json:"num_total"`
+	AcEasy    int             `json:"ac_easy"`
+	AcMedium  int             `json:"ac_medium"`
+	AcHard    int             `json:"ac_hard"`
+	Problems  []model.Problem `json:"stat_status_pairs"`
 }
 
 // GetProblemCollection is the query function fetching leetcode Problem List
@@ -122,7 +33,7 @@ func (client *Client) GetProblemCollection(category string, query string, name s
 	// filter problems by name
 	if name != "" {
 		name = strings.ToLower(name)
-		var queriedProblems []Problem
+		var queriedProblems []model.Problem
 
 		for _, problem := range problemCollection.Problems {
 			if strings.Contains(strings.ToLower(problem.Stat.QuestionTitle), name) {
@@ -141,7 +52,7 @@ func (client *Client) GetProblemCollection(category string, query string, name s
 			return nil, err
 		}
 
-		var queriedProblems []Problem
+		var queriedProblems []model.Problem
 
 		for _, problem := range problemCollection.Problems {
 			for _, queryQuestionID := range problemIDList {
@@ -155,7 +66,7 @@ func (client *Client) GetProblemCollection(category string, query string, name s
 
 	// filter problems by lock status
 	if lock != "all" {
-		var queriedProblems []Problem
+		var queriedProblems []model.Problem
 		for _, problem := range problemCollection.Problems {
 			if problem.CheckLockStatus(lock) {
 				queriedProblems = append(queriedProblems, problem)
@@ -166,7 +77,7 @@ func (client *Client) GetProblemCollection(category string, query string, name s
 
 	// filter problems by status
 	if status != "all" {
-		var queriedProblems []Problem
+		var queriedProblems []model.Problem
 		for _, problem := range problemCollection.Problems {
 			if problem.CheckStatus(status) {
 				queriedProblems = append(queriedProblems, problem)
