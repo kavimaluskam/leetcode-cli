@@ -66,6 +66,7 @@ func userSignIn(cmd *cobra.Command, args []string) error {
 
 	file, err := json.Marshal(data)
 	if err != nil {
+		// TODO: enhance error type handling
 		return fmt.Errorf("Error on processing authencation json: %s", err.Error())
 	}
 

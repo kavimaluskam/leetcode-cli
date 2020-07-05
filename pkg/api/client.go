@@ -301,6 +301,7 @@ func handleHTTPError(resp *http.Response) error {
 		message = parsedBody.Message
 	}
 
+	// TODO: enhance error type handling
 	return fmt.Errorf("http error, '%s' failed (%d): '%s'", resp.Request.URL, resp.StatusCode, message)
 }
 

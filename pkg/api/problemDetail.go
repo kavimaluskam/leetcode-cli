@@ -105,6 +105,7 @@ func (client *Client) GetProblemDetail(id int, titleSlug string) (*ProblemDetail
 		}
 
 		if titleSlug == "" {
+			// TODO: enhance error type handling
 			return nil, fmt.Errorf(
 				"Failed to find problem with ID %d",
 				id,
