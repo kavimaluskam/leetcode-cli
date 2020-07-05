@@ -8,7 +8,7 @@ import (
 // URLs supported by LeetCode api
 const (
 	BaseURL           = "https://leetcode.com"
-	GraphqlURL        = "https://leetcode.com/graphql"
+	GraphQLURL        = "https://leetcode.com/graphql"
 	LoginURL          = "https://leetcode.com/accounts/login/"
 	ProblemListingURL = "https://leetcode.com/api/problems/$category/"
 	ProblemQueryURL   = "https://leetcode.com/problems/api/filter-questions/$query"
