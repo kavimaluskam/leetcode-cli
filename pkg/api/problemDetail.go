@@ -1,0 +1,68 @@
+package api
+
+import (
+	"fmt"
+	"math/rand"
+	"time"
+
+	"github.com/kavimaluskam/leetcode-cli/pkg/model"
+	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
+)
+
+// ProblemDetailCollection is the response from leetcode GraphQL API
+// concerning problem deatil
+type ProblemDetailCollection struct {
+	Question model.ProblemDetail `json:"question"`
+}
+
+// GetProblemDetail is the graphql query function fetching leetcode Individual Problem
+func (client *Client) GetProblemDetail(id int, titleSlug string, random bool) (*model.ProblemDetail, error) {
+	var problemDetailCollection ProblemDetailCollection
+
+	if random { // randomly pick problem title slug
+		problemCollection, err := client.GetProblemCollection("all", "", "", "free", "new")
+		if err != nil {
+			return nil, err
+		}
+
+		rand.Seed(time.Now().Unix())
+		i := rand.Int() % len(problemCollection.Problems)
+
+		titleSlug = problemCollection.Problems[i].Stat.QuestionTitleSlug
+
+	} else if titleSlug == "" && id != 0 { // pick title slug by id
+		problemCollection, err := client.GetProblemCollection("all", "", "", "all", "all")
+		if err != nil {
+			return nil, err
+		}
+
+		for _, problem := range problemCollection.Problems {
+			if problem.Stat.QuestionID == id {
+				titleSlug = problem.Stat.QuestionTitleSlug
+			}
+		}
+
+		if titleSlug == "" {
+			// TODO: enhance error type handling
+			return nil, fmt.Errorf(
+				"Failed to find problem with ID %d",
+				id,
+			)
+		}
+	}
+
+	variables := make(map[string]interface{})
+	variables["titleSlug"] = titleSlug
+
+	err := client.GraphQL(
+		utils.QuestionDataOperation,
+		utils.QuestionDataQuery,
+		variables,
+		&problemDetailCollection,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &problemDetailCollection.Question, nil
+}

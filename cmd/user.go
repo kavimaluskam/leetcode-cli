@@ -12,7 +12,6 @@ import (
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/input"
 	"github.com/kavimaluskam/leetcode-cli/pkg/api"
-	"github.com/kavimaluskam/leetcode-cli/pkg/cmd/util"
 	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
@@ -33,14 +32,14 @@ var userCmd = &cobra.Command{
 var userSignInCmd = &cobra.Command{
 	Use:   `signin`,
 	Short: `Sign in to leetcode on cli`,
-	Args:  util.NoArgsQuoteReminder,
+	Args:  cobra.NoArgs,
 	RunE:  userSignIn,
 }
 
 var userSignOutCmd = &cobra.Command{
 	Use:   `signout`,
 	Short: `Sign out from leetcode on cli`,
-	Args:  util.NoArgsQuoteReminder,
+	Args:  cobra.NoArgs,
 }
 
 func userSignIn(cmd *cobra.Command, args []string) error {
@@ -66,8 +65,8 @@ func userSignIn(cmd *cobra.Command, args []string) error {
 
 	file, err := json.Marshal(data)
 	if err != nil {
-		fmt.Errorf("Error on processing authencation json: %s", err.Error())
-		return err
+		// TODO: enhance error type handling
+		return fmt.Errorf("Error on processing authencation json: %s", err.Error())
 	}
 
 	err = ioutil.WriteFile(utils.AuthConfigPath, file, os.ModePerm)
@@ -76,13 +75,6 @@ func userSignIn(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Printf("Successfully signed in as %s\n", username)
-	return nil
-}
-
-func userSignOut(cmd *cobra.Command, args []string) error {
-	// TODO: add login implementation
-	fmt.Println("User sign out!")
-
 	return nil
 }
 

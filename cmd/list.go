@@ -1,72 +1,47 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/kavimaluskam/leetcode-cli/pkg/api"
+	"github.com/kavimaluskam/leetcode-cli/pkg/arg"
 	"github.com/spf13/cobra"
 )
 
 func init() {
 	RootCmd.AddCommand(listCmd)
-	listCmd.Flags().StringP("category", "c", "all", "problem categories: {''|all|algorithms|database|shell}")
+	listCmd.Flags().StringP("category", "c", "all", "problem categories: {all|algorithms|database|shell}")
 	listCmd.Flags().StringP("query", "q", "", "problem query string")
-	listCmd.Flags().StringP("name", "n", "", "problem name query")
+	listCmd.Flags().StringP("name", "n", "", "problem name query string")
+	listCmd.Flags().StringP("lock", "l", "all", "problem lock status: {all|free|locked}")
+	listCmd.Flags().StringP("status", "s", "all", "problem status: {all|approved|rejected|new}")
 }
 
 var listCmd = &cobra.Command{
 	Use:     `list`,
 	Aliases: []string{`li`},
 	Short:   `Listing questions`,
+	Args:    arg.List,
 	RunE:    list,
 }
 
 func list(cmd *cobra.Command, args []string) error {
-	category, err := cmd.Flags().GetString("category")
-	if err != nil {
-		return err
-	}
-
-	name, err := cmd.Flags().GetString("name")
-	if err != nil {
-		return err
-	}
-
-	query, err := cmd.Flags().GetString("query")
-	if err != nil {
-		return err
-	}
+	category, _ := cmd.Flags().GetString("category")
+	name, _ := cmd.Flags().GetString("name")
+	query, _ := cmd.Flags().GetString("query")
+	lock, _ := cmd.Flags().GetString("lock")
+	status, _ := cmd.Flags().GetString("status")
 
 	client, err := api.GetAuthClient()
 	if err != nil {
 		return err
 	}
 
-	var problemCollection *api.ProblemCollection
-
-	switch category {
-	case "all":
-		problemCollection, err = client.GetProblemCollection("all", query, name)
-	case "algorithms", "database", "shell":
-		problemCollection, err = client.GetProblemCollection(category, query, name)
-	default:
-		return fmt.Errorf("unsupported category %s", category)
-	}
+	problemCollection, err := client.GetProblemCollection(category, query, name, lock, status)
 	if err != nil {
 		return err
 	}
 
 	for _, problem := range problemCollection.Problems {
-		fmt.Printf(
-			"%2s%2s%2s [%4d] %-60s %s (%.2f %%)\n",
-			problem.GetLockedStatus(),
-			problem.GetIsFavor(),
-			problem.GetStatus(),
-			problem.Stat.QuestionID,
-			problem.Stat.QuestionTitle,
-			problem.GetDiffculty("%-6s"),
-			(float64(problem.Stat.TotalAcs) / float64(problem.Stat.TotalSubmitted)),
-		)
+		problem.ExportStdoutListing()
 	}
 
 	return nil

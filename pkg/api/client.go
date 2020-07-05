@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/henvic/httpretty"
+	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
 )
 
 // ClientOption represents an argument to NewClient
@@ -195,14 +196,19 @@ func (c Client) HasScopes(wantedScopes ...string) (bool, string, error) {
 }
 
 // GraphQL performs a GraphQL request and parses the response
-func (c Client) GraphQL(query string, variables map[string]interface{}, data interface{}) error {
-	url := "https://api.github.com/graphql"
-	reqBody, err := json.Marshal(map[string]interface{}{"query": query, "variables": variables})
+func (c Client) GraphQL(operationName string, query string, variables map[string]interface{}, data interface{}) error {
+	reqBody, err := json.Marshal(
+		map[string]interface{}{
+			"operationName": operationName,
+			"query":         query,
+			"variables":     variables,
+		},
+	)
 	if err != nil {
 		return err
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(reqBody))
+	req, err := http.NewRequest("POST", utils.GraphQLURL, bytes.NewBuffer(reqBody))
 	if err != nil {
 		return err
 	}
@@ -295,6 +301,7 @@ func handleHTTPError(resp *http.Response) error {
 		message = parsedBody.Message
 	}
 
+	// TODO: enhance error type handling
 	return fmt.Errorf("http error, '%s' failed (%d): '%s'", resp.Request.URL, resp.StatusCode, message)
 }
 
