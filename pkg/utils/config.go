@@ -3,7 +3,6 @@ package utils
 import (
 	"fmt"
 	"os"
-	"strings"
 )
 
 // URLs supported by leetcode api
@@ -29,67 +28,66 @@ var (
 )
 
 // GraphQL related query, operation string
-var (
-	QuestionDataQuery = strings.Join([]string{
-		"query questionData($titleSlug: String!) {",
-		"    question(titleSlug: $titleSlug) {",
-		"        questionId",
-		"        questionFrontendId",
-		"        boundTopicId",
-		"        title",
-		"        titleSlug",
-		"        content",
-		"        translatedTitle",
-		"        translatedContent",
-		"        isPaidOnly",
-		"        difficulty",
-		"        likes",
-		"        dislikes",
-		"        isLiked",
-		"        similarQuestions",
-		"        contributors {",
-		"            username",
-		"            profileUrl",
-		"            avatarUrl",
-		"            __typename",
-		"        }",
-		"        langToValidPlayground",
-		"        topicTags {",
-		"            name",
-		"            slug",
-		"            translatedName",
-		"            __typename",
-		"        }",
-		"        companyTagStats",
-		"        codeSnippets {",
-		"            lang",
-		"            langSlug",
-		"            code",
-		"            __typename",
-		"        }",
-		"        stats",
-		"        hints",
-		"        solution {",
-		"            id",
-		"            canSeeDetail",
-		"            paidOnly",
-		"            __typename",
-		"        }",
-		"        status",
-		"        sampleTestCase",
-		"        metaData",
-		"        judgerAvailable",
-		"        judgeType",
-		"        mysqlSchemas",
-		"        enableRunCode",
-		"        enableTestMode",
-		"        enableDebugger",
-		"        envInfo",
-		"        libraryUrl",
-		"        adminUrl",
-		"        __typename",
-		"    }",
-		"}",
-	}, "\n")
+const (
+	QuestionDataQuery = `
+		query questionData($titleSlug: String!) {
+		    question(titleSlug: $titleSlug) {
+		        questionId
+		        questionFrontendId
+		        boundTopicId
+		        title
+		        titleSlug
+		        content
+		        translatedTitle
+		        translatedContent
+		        isPaidOnly
+		        difficulty
+		        likes
+		        dislikes
+		        isLiked
+		        similarQuestions
+		        contributors {
+		            username
+		            profileUrl
+		            avatarUrl
+		            __typename
+		        }
+		        langToValidPlayground
+		        topicTags {
+		            name
+		            slug
+		            translatedName
+		            __typename
+		        }
+		        companyTagStats
+		        codeSnippets {
+		            lang
+		            langSlug
+		            code
+		            __typename
+		        }
+		        stats
+		        hints
+		        solution {
+		            id
+		            canSeeDetail
+		            paidOnly
+		            __typename
+		        }
+		        status
+		        sampleTestCase
+		        metaData
+		        judgerAvailable
+		        judgeType
+		        mysqlSchemas
+		        enableRunCode
+		        enableTestMode
+		        enableDebugger
+		        envInfo
+		        libraryUrl
+		        adminUrl
+		        __typename
+		    }
+		}`
 	QuestionDataOperation = "questionData"
 )
