@@ -79,13 +79,6 @@ func userSignIn(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func userSignOut(cmd *cobra.Command, args []string) error {
-	// TODO: add login implementation
-	fmt.Println("User sign out!")
-
-	return nil
-}
-
 func login(username string, password string) (csrfToken string, sessionID string) {
 	// Launch a new browser with default options, and connect to it.
 	browser := rod.New().Connect()
