@@ -7,10 +7,8 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"regexp"
 	"strings"
 
-	"github.com/henvic/httpretty"
 	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
 )
 
@@ -44,77 +42,10 @@ func AddHeader(name, value string) ClientOption {
 	}
 }
 
-// AddHeaderFunc is an AddHeader that gets the string value from a function
-func AddHeaderFunc(name string, value func() string) ClientOption {
-	return func(tr http.RoundTripper) http.RoundTripper {
-		return &funcTripper{roundTrip: func(req *http.Request) (*http.Response, error) {
-			// prevent the token from leaking to non-GitHub hosts
-			// TODO: GHE support
-			if !strings.EqualFold(name, "Authorization") || strings.HasSuffix(req.URL.Hostname(), ".github.com") {
-				req.Header.Add(name, value())
-			}
-			return tr.RoundTrip(req)
-		}}
-	}
-}
-
-// VerboseLog enables request/response logging within a RoundTripper
-func VerboseLog(out io.Writer, logTraffic bool, colorize bool) ClientOption {
-	logger := &httpretty.Logger{
-		Time:           true,
-		TLS:            false,
-		Colors:         colorize,
-		RequestHeader:  logTraffic,
-		RequestBody:    logTraffic,
-		ResponseHeader: logTraffic,
-		ResponseBody:   logTraffic,
-		Formatters:     []httpretty.Formatter{&httpretty.JSONFormatter{}},
-	}
-	logger.SetOutput(out)
-	logger.SetBodyFilter(func(h http.Header) (skip bool, err error) {
-		return !inspectableMIMEType(h.Get("Content-Type")), nil
-	})
-	return logger.RoundTripper
-}
-
 // ReplaceTripper substitutes the underlying RoundTripper with a custom one
 func ReplaceTripper(tr http.RoundTripper) ClientOption {
 	return func(http.RoundTripper) http.RoundTripper {
 		return tr
-	}
-}
-
-var issuedScopesWarning bool
-
-// CheckScopes checks whether an OAuth scope is present in a response
-func CheckScopes(wantedScope string, cb func(string) error) ClientOption {
-	return func(tr http.RoundTripper) http.RoundTripper {
-		return &funcTripper{roundTrip: func(req *http.Request) (*http.Response, error) {
-			res, err := tr.RoundTrip(req)
-			if err != nil || res.StatusCode > 299 || issuedScopesWarning {
-				return res, err
-			}
-
-			appID := res.Header.Get("X-Oauth-Client-Id")
-			hasScopes := strings.Split(res.Header.Get("X-Oauth-Scopes"), ",")
-
-			hasWanted := false
-			for _, s := range hasScopes {
-				if wantedScope == strings.TrimSpace(s) {
-					hasWanted = true
-					break
-				}
-			}
-
-			if !hasWanted {
-				if err := cb(appID); err != nil {
-					return res, err
-				}
-				issuedScopesWarning = true
-			}
-
-			return res, nil
-		}}
 	}
 }
 
@@ -154,45 +85,6 @@ func (gr GraphQLErrorResponse) Error() string {
 		errorMessages = append(errorMessages, e.Message)
 	}
 	return fmt.Sprintf("graphql error: '%s'", strings.Join(errorMessages, ", "))
-}
-
-// Returns whether or not scopes are present, appID, and error
-func (c Client) HasScopes(wantedScopes ...string) (bool, string, error) {
-	url := "https://api.github.com/user"
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return false, "", err
-	}
-
-	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-
-	res, err := c.http.Do(req)
-	if err != nil {
-		return false, "", err
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode != 200 {
-		return false, "", handleHTTPError(res)
-	}
-
-	appID := res.Header.Get("X-Oauth-Client-Id")
-	hasScopes := strings.Split(res.Header.Get("X-Oauth-Scopes"), ",")
-
-	found := 0
-	for _, s := range hasScopes {
-		for _, w := range wantedScopes {
-			if w == strings.TrimSpace(s) {
-				found++
-			}
-		}
-	}
-
-	if found == len(wantedScopes) {
-		return true, appID, nil
-	}
-
-	return false, appID, nil
 }
 
 // GraphQL performs a GraphQL request and parses the response
@@ -303,10 +195,4 @@ func handleHTTPError(resp *http.Response) error {
 
 	// TODO: enhance error type handling
 	return fmt.Errorf("http error, '%s' failed (%d): '%s'", resp.Request.URL, resp.StatusCode, message)
-}
-
-var jsonTypeRE = regexp.MustCompile(`[/+]json($|;)`)
-
-func inspectableMIMEType(t string) bool {
-	return strings.HasPrefix(t, "text/") || jsonTypeRE.MatchString(t)
 }
