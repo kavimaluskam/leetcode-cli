@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/cli/cli/api"
 	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
 )
 
-// Auth is the config of leetcode stored in local cache
+// Auth is the config of leetcode stored in local
 type Auth struct {
 	Login       string `json:"login"`
 	LoginCSRF   string `json:"loginCSRF"`
@@ -23,7 +22,7 @@ func GetAuthClient() (*Client, error) {
 	a := Auth{}
 	_ = json.Unmarshal([]byte(file), &a)
 
-	var opts []api.ClientOption
+	var opts []ClientOption
 
 	opts = append(
 		opts,
