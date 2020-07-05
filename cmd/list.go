@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/kavimaluskam/leetcode-cli/pkg/api"
-	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
+	"github.com/kavimaluskam/leetcode-cli/pkg/cmd/arg"
 	"github.com/spf13/cobra"
 )
 
@@ -21,46 +21,8 @@ var listCmd = &cobra.Command{
 	Use:     `list`,
 	Aliases: []string{`li`},
 	Short:   `Listing questions`,
-	Args:    vList,
+	Args:    arg.ListArgs,
 	RunE:    list,
-}
-
-func vList(cmd *cobra.Command, args []string) error {
-	category, err := cmd.Flags().GetString("category")
-	if err != nil {
-		return err
-	}
-	if !utils.Contains([]interface{}{"all", "algorithms", "database", "shell"}, category) {
-		return fmt.Errorf("Unsupported parameter %s: %s", "category", category)
-	}
-
-	_, err = cmd.Flags().GetString("name")
-	if err != nil {
-		return err
-	}
-
-	_, err = cmd.Flags().GetString("query")
-	if err != nil {
-		return err
-	}
-
-	lock, err := cmd.Flags().GetString("lock")
-	if err != nil {
-		return err
-	}
-	if !utils.Contains([]interface{}{"all", "free", "locked"}, lock) {
-		return fmt.Errorf("Unsupported parameter %s: %s", "lock", lock)
-	}
-
-	status, err := cmd.Flags().GetString("status")
-	if err != nil {
-		return err
-	}
-	if !utils.Contains([]interface{}{"all", "approved", "rejected", "new"}, status) {
-		return fmt.Errorf("Unsupported parameter %s: %s", "status", status)
-	}
-
-	return nil
 }
 
 func list(cmd *cobra.Command, args []string) error {
