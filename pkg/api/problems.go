@@ -25,7 +25,7 @@ type Problem struct {
 		QuestionArticleLive bool   `json:"question__article__live"`
 		QuestionArticleSlug string `json:"question__article__slug"`
 		QuestionTitle       string `json:"question__title"`
-		QuestionTitleSlug   string `json:"question__tile_slug"`
+		QuestionTitleSlug   string `json:"question__title_slug"`
 		TotalAcs            int    `json:"total_acs"`
 		TotalSubmitted      int    `json:"total_submitted"`
 		FrontendQuestionID  int    `json:"frontend_question_id"`
