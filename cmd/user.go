@@ -12,7 +12,6 @@ import (
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/input"
 	"github.com/kavimaluskam/leetcode-cli/pkg/api"
-	"github.com/kavimaluskam/leetcode-cli/pkg/cmd/util"
 	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
@@ -33,14 +32,14 @@ var userCmd = &cobra.Command{
 var userSignInCmd = &cobra.Command{
 	Use:   `signin`,
 	Short: `Sign in to leetcode on cli`,
-	Args:  util.NoArgsQuoteReminder,
+	Args:  cobra.NoArgs,
 	RunE:  userSignIn,
 }
 
 var userSignOutCmd = &cobra.Command{
 	Use:   `signout`,
 	Short: `Sign out from leetcode on cli`,
-	Args:  util.NoArgsQuoteReminder,
+	Args:  cobra.NoArgs,
 }
 
 func userSignIn(cmd *cobra.Command, args []string) error {
