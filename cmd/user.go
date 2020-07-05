@@ -66,8 +66,7 @@ func userSignIn(cmd *cobra.Command, args []string) error {
 
 	file, err := json.Marshal(data)
 	if err != nil {
-		fmt.Errorf("Error on processing authencation json: %s", err.Error())
-		return err
+		return fmt.Errorf("Error on processing authencation json: %s", err.Error())
 	}
 
 	err = ioutil.WriteFile(utils.AuthConfigPath, file, os.ModePerm)

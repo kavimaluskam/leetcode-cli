@@ -8,6 +8,7 @@ func init() {
 	RootCmd.PersistentFlags().Bool("help", false, "Show help for command")
 }
 
+// RootCmd is the entry point of command-line execution
 var RootCmd = &cobra.Command{
 	Use:   "lc <command> <subcommand> [flags]",
 	Short: "leetcode CLI",
