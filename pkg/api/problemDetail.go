@@ -93,7 +93,7 @@ func (client *Client) GetProblemDetail(id int, titleSlug string) (*ProblemDetail
 	var problemDetailCollection ProblemDetailCollection
 
 	if titleSlug == "" && id != 0 {
-		problemCollection, err := client.GetProblemCollection("all", "", "")
+		problemCollection, err := client.GetProblemCollection("all", "", "", "all", "all")
 		if err != nil {
 			return nil, err
 		}

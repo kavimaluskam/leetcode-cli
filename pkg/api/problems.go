@@ -65,6 +65,20 @@ func (p Problem) GetStatus() string {
 	}
 }
 
+// CheckStatus is a switcher function checking problem status with `status` checker
+func (p Problem) CheckStatus(checker string) bool {
+	switch checker {
+	case "approved":
+		return p.Status == "ac"
+	case "rejected":
+		return p.Status == "notac"
+	case "new":
+		return p.Status == ""
+	default:
+		return true
+	}
+}
+
 // GetIsFavor is a mapper function from `is_favor` status to emoji
 func (p Problem) GetIsFavor() string {
 	if p.IsFavor {
@@ -73,16 +87,28 @@ func (p Problem) GetIsFavor() string {
 	return "   "
 }
 
-// GetLockedStatus is a mapper function from `paid_only` status to emoji
-func (p Problem) GetLockedStatus() string {
+// GetLockStatus is a mapper function from `paid_only` status to emoji
+func (p Problem) GetLockStatus() string {
 	if p.PaidOnly {
 		return emoji.Sprint(":locked:")
 	}
 	return "   "
 }
 
+// CheckLockStatus is a switcher function checking `paid_only` with `lock` checker
+func (p Problem) CheckLockStatus(checker string) bool {
+	switch checker {
+	case "locked":
+		return p.PaidOnly
+	case "free":
+		return !p.PaidOnly
+	default:
+		return true
+	}
+}
+
 // GetProblemCollection is the query function fetching leetcode Problem List
-func (client *Client) GetProblemCollection(category string, query string, name string) (*ProblemCollection, error) {
+func (client *Client) GetProblemCollection(category string, query string, name string, lock string, status string) (*ProblemCollection, error) {
 	var problemCollection ProblemCollection
 	var problemIDList []int
 
@@ -122,6 +148,28 @@ func (client *Client) GetProblemCollection(category string, query string, name s
 				if problem.Stat.QuestionID == queryQuestionID {
 					queriedProblems = append(queriedProblems, problem)
 				}
+			}
+		}
+		problemCollection.Problems = queriedProblems
+	}
+
+	// filter problems by lock status
+	if lock != "all" {
+		var queriedProblems []Problem
+		for _, problem := range problemCollection.Problems {
+			if problem.CheckLockStatus(lock) {
+				queriedProblems = append(queriedProblems, problem)
+			}
+		}
+		problemCollection.Problems = queriedProblems
+	}
+
+	// filter problems by status
+	if status != "all" {
+		var queriedProblems []Problem
+		for _, problem := range problemCollection.Problems {
+			if problem.CheckStatus(status) {
+				queriedProblems = append(queriedProblems, problem)
 			}
 		}
 		problemCollection.Problems = queriedProblems
