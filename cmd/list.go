@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/kavimaluskam/leetcode-cli/pkg/api"
-	"github.com/kavimaluskam/leetcode-cli/pkg/cmd/arg"
+	"github.com/kavimaluskam/leetcode-cli/pkg/arg"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +21,7 @@ var listCmd = &cobra.Command{
 	Use:     `list`,
 	Aliases: []string{`li`},
 	Short:   `Listing questions`,
-	Args:    arg.ListArgs,
+	Args:    arg.List,
 	RunE:    list,
 }
 
