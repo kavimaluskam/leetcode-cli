@@ -23,8 +23,10 @@ const (
 	FavoriteDeleteURL = "https://leetcode.com/list/api/questions/$hash/$id"
 )
 
+// Local Path for configuration
 var (
-	AuthConfigPath = fmt.Sprintf("%s/.lc/leetcode/user.json", os.Getenv("HOME"))
+	AuthConfigPath     = fmt.Sprintf("%s/.lc/leetcode/user.json", os.Getenv("HOME"))
+	TemplateConfigPath = fmt.Sprintf("%s/.lc/leetcode/template.json", os.Getenv("HOME"))
 )
 
 // GraphQL related query, operation string
