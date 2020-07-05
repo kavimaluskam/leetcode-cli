@@ -37,24 +37,26 @@ func list(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	client, err := api.GetAuthClient()
-	if err != nil {
-		return err
+	acceptedCategory := map[string]bool{
+		"all":        true,
+		"algorithms": true,
+		"database":   true,
+		"shell":      true,
 	}
-
-	var problemCollection *api.ProblemCollection
-
-	switch category {
-	case "all":
-		problemCollection, err = client.GetProblemCollection("all", query, name)
-	case "algorithms", "database", "shell":
-		problemCollection, err = client.GetProblemCollection(category, query, name)
-	default:
+	if acceptedCategory[category] == false {
+		// TODO: enhance error type handling
 		return fmt.Errorf(
 			"Failed to list problems with unsupported category %s",
 			category,
 		)
 	}
+
+	client, err := api.GetAuthClient()
+	if err != nil {
+		return err
+	}
+
+	problemCollection, err := client.GetProblemCollection(category, query, name)
 	if err != nil {
 		return err
 	}
