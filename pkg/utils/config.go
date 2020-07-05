@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-// URLs supported by LeetCode api
+// URLs supported by leetcode api
 const (
 	BaseURL           = "https://leetcode.com"
 	GraphQLURL        = "https://leetcode.com/graphql"

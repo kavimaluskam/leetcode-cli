@@ -10,6 +10,6 @@ func init() {
 
 var RootCmd = &cobra.Command{
 	Use:   "lc <command> <subcommand> [flags]",
-	Short: "LeetCode CLI",
-	Long:  `Work seamlessly with LeetCode from the command line.`,
+	Short: "leetcode CLI",
+	Long:  `Work seamlessly with leetcode from the command line.`,
 }

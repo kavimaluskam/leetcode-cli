@@ -81,7 +81,7 @@ func (p Problem) GetLockedStatus() string {
 	return "   "
 }
 
-// GetProblemCollection is the query function fetching LeetCode Problem List
+// GetProblemCollection is the query function fetching leetcode Problem List
 func (client *Client) GetProblemCollection(category string, query string, name string) (*ProblemCollection, error) {
 	var problemCollection ProblemCollection
 	var problemIDList []int

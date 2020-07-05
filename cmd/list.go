@@ -50,7 +50,10 @@ func list(cmd *cobra.Command, args []string) error {
 	case "algorithms", "database", "shell":
 		problemCollection, err = client.GetProblemCollection(category, query, name)
 	default:
-		return fmt.Errorf("unsupported category %s", category)
+		return fmt.Errorf(
+			"Failed to list problems with unsupported category %s",
+			category,
+		)
 	}
 	if err != nil {
 		return err
