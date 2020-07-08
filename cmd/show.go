@@ -8,9 +8,9 @@ import (
 
 func init() {
 	RootCmd.AddCommand(showCmd)
-	showCmd.Flags().IntP("id", "i", 0, "ID of Problem to be shown")
-	showCmd.Flags().StringP("title", "t", "", "Title Slug of Problem to be shown")
-	showCmd.Flags().BoolP("random", "r", false, "Random choice of Problem to be shown")
+	showCmd.Flags().IntP("id", "i", 0, "ID of problem to be shown")
+	showCmd.Flags().StringP("title", "t", "", "Title Slug of problem to be shown")
+	showCmd.Flags().BoolP("random", "r", false, "Random choice of problem to be shown")
 	showCmd.Flags().BoolP("generate", "g", false, "Generate source code")
 	showCmd.Flags().StringP("language", "l", "", "Open source code in editor")
 }
@@ -19,6 +19,7 @@ var showCmd = &cobra.Command{
 	Use:     `show`,
 	Aliases: []string{`dl`, `pick`, `show`},
 	Short:   `Show individual problem`,
+	Long:    `Show or download individual problem description and code template`,
 	Args:    arg.Show,
 	RunE:    show,
 }
