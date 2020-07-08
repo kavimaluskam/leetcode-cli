@@ -2,15 +2,10 @@ package cmd
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
-	"time"
 
-	"github.com/go-rod/rod"
-	"github.com/go-rod/rod/lib/input"
 	"github.com/kavimaluskam/leetcode-cli/pkg/api"
 	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
 	"github.com/spf13/cobra"
@@ -42,70 +37,51 @@ var userSignOutCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 }
 
-func userSignIn(cmd *cobra.Command, args []string) error {
-	reader := bufio.NewReader(os.Stdin)
+func userSignIn(cmd *cobra.Command, args []string) (err error) {
+	var username string
+	var passwordStr string
+	auth, err := api.GetAuthCredentials()
 
-	fmt.Printf("Please enter your username: ")
-	username, _ := reader.ReadString('\n')
-	username = strings.TrimSuffix(username, "\n")
+	if auth.Username == "" || auth.Password == "" || err != nil {
+		fmt.Println(
+			utils.Gray("Cannot read auth credentials in local config, asking for manual input"),
+		)
+		reader := bufio.NewReader(os.Stdin)
 
-	fmt.Printf("Please enter your password: \n")
-	password, _ := terminal.ReadPassword(0)
-	passwordStr := fmt.Sprintf("%s", password)
+		fmt.Printf("Please enter your username: ")
+		username, err = reader.ReadString('\n')
+		if err != nil {
+			return err
+		}
+		username = strings.TrimSuffix(username, "\n")
 
+		fmt.Printf("Please enter your password: \n")
+		password, err := terminal.ReadPassword(0)
+		if err != nil {
+			return err
+		}
+		passwordStr = fmt.Sprintf("%s", password)
+	} else {
+		username = auth.Username
+		passwordStr = auth.Password
+	}
+
+	a := api.Auth{
+		Username: username,
+		Password: passwordStr,
+	}
 	fmt.Printf("Loggin into leetcode as %s...\n", username)
-	csrfToken, sessionID := login(username, passwordStr)
 
-	data := api.Auth{
-		Login:       username,
-		LoginCSRF:   "",
-		SessionCSRF: csrfToken,
-		SessionID:   sessionID,
-	}
-
-	file, err := json.Marshal(data)
+	err = a.Login()
 	if err != nil {
-		// TODO: enhance error type handling
-		return fmt.Errorf("Error on processing authencation json: %s", err.Error())
+		return err
 	}
 
-	err = ioutil.WriteFile(utils.AuthConfigPath, file, os.ModePerm)
+	err = a.SetAuthCredentials()
 	if err != nil {
 		return err
 	}
 
 	fmt.Printf("Successfully signed in as %s\n", username)
 	return nil
-}
-
-func login(username string, password string) (csrfToken string, sessionID string) {
-	// Launch a new browser with default options, and connect to it.
-	browser := rod.New().Connect()
-
-	// Even you forget to close, rod will close it after main process ends.
-	defer browser.Close()
-
-	// Timeout will be passed to all chained function calls.
-	// The code will panic out if any chained call is used after the timeout.
-	page := browser.Timeout(time.Minute).Page(utils.LoginURL)
-
-	// Resize the window make sure window size is always consistent.
-	page.Window(0, 0, 1200, 600)
-
-	page.Element("#signin_btn").WaitVisible()
-
-	page.Element("#id_login").Input(username)
-	page.Element("#id_password").Input(password).Press(input.Enter)
-
-	page.Element("#nav-user-app").WaitVisible()
-
-	for _, cookie := range page.Cookies() {
-		if cookie.Name == "csrftoken" {
-			csrfToken = cookie.Value
-		} else if cookie.Name == "LEETCODE_SESSION" {
-			sessionID = cookie.Value
-		}
-	}
-
-	return csrfToken, sessionID
 }
