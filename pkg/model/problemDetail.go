@@ -77,6 +77,7 @@ type ProblemCodeSnippets struct {
 	TypeName string `json:"__typename"`
 }
 
+// GetLanguageExt is a mapper function mapping question lang slug to file ext
 func (pcs ProblemCodeSnippets) GetLanguageExt() string {
 	switch pcs.LangSlug {
 	case "cpp":
@@ -86,7 +87,7 @@ func (pcs ProblemCodeSnippets) GetLanguageExt() string {
 	case "python":
 		return "py"
 	case "python3":
-		return "py"
+		return "py3"
 	case "c":
 		return "c"
 	case "csharp":
@@ -314,4 +315,51 @@ func (pd ProblemDetail) generateSourceCode(t *Template, language string) (string
 	errMessage := fmt.Sprintf("invalid language '%s' for problem: '%s'", language, pd.Title)
 	errMessage += fmt.Sprintf(" with supported language:\n[%s]", strings.Join(supportedLanguage, ", "))
 	return "", fmt.Errorf(errMessage)
+}
+
+// GetLanguageSlug is a mapper function mapping file ext to question slug, with checking
+func (pd ProblemDetail) GetLanguageSlug(ext string) (string, error) {
+	var slug string
+	switch ext {
+	case ".cpp":
+		slug = "cpp"
+	case ".java":
+		slug = "java"
+	case ".py":
+		slug = "python"
+	case ".py3":
+		slug = "python3"
+	case ".c":
+		slug = "c"
+	case ".cs":
+		slug = "csharp"
+	case ".js":
+		slug = "javascript"
+	case ".rb":
+		slug = "ruby"
+	case ".swift":
+		slug = "swift"
+	case ".go":
+		slug = "golang"
+	case ".scala":
+		slug = "scala"
+	case ".kt":
+		slug = "kotlin"
+	case ".rs":
+		slug = "rust"
+	case ".php":
+		slug = "php"
+	case ".ts":
+		slug = "typescript"
+	default:
+		slug = ""
+	}
+
+	for _, pcs := range pd.CodeSnippets {
+		if slug == pcs.LangSlug {
+			return slug, nil
+		}
+	}
+
+	return "", fmt.Errorf("question %s does not support file format %s", pd.QuestionID, ext)
 }
