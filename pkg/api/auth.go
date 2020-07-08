@@ -90,9 +90,6 @@ func (a *Auth) Login() error {
 	// Launch a new browser with default options, and connect to it.
 	browser := rod.New().Connect()
 
-	// Even you forget to close, rod will close it after main process ends.
-	defer browser.Close()
-
 	// Timeout will be passed to all chained function calls.
 	// The code will panic out if any chained call is used after the timeout.
 	page := browser.Timeout(30 * time.Second).Page(utils.LoginURL)
