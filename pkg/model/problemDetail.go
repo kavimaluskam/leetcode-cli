@@ -162,24 +162,24 @@ func (pd ProblemDetail) ExportStdoutDetail() error {
 		return err
 	}
 
+	var tags []string
+	for _, t := range pd.TopicTags {
+		tags = append(tags, utils.Yellow(t.Name))
+	}
+
 	p := strings.NewReader(pd.Content)
 	parsedContent, err := goquery.NewDocumentFromReader(p)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("[%s] %s\n", pd.QuestionID, pd.Title)
-	fmt.Println()
-	fmt.Println(utils.Gray(strings.Replace(utils.ProblemURL, "$slug", pd.TitleSlug, 1)))
-	fmt.Println()
+	fmt.Printf("[%s] %s\n\n", pd.QuestionID, pd.Title)
+	fmt.Printf("%s\n\n", utils.Gray(strings.Replace(utils.ProblemURL, "$slug", pd.TitleSlug, 1)))
+	fmt.Printf("Tags: %s \n\n", strings.Join(tags, ", "))
 	fmt.Printf("* %s (%s)\n", pd.GetDiffculty(), pds.AcceptRate)
 	fmt.Printf("* Total Accepted:    %d\n", pds.TotalAcceptedRaw)
 	fmt.Printf("* Total Submissions: %d\n", pds.TotalSubmissionRaw)
-	fmt.Println("* Testcase Example:")
-	for _, line := range strings.Split(pd.SampleTestCase, "\n") {
-		fmt.Printf("  %s\n", line)
-	}
-	fmt.Println()
+	fmt.Printf("* Testcase Example: %s\n\n", strings.ReplaceAll(pd.SampleTestCase, "\n", "\\n"))
 	fmt.Println(parsedContent.Text())
 
 	return nil
@@ -214,18 +214,23 @@ func (pd ProblemDetail) GenerateMarkdown(t *Template) error {
 		return err
 	}
 
-	markdown += fmt.Sprintf("# [%s] %s\n", pd.QuestionID, pd.Title)
-	markdown += "\n"
-	markdown += fmt.Sprintln(strings.Replace(utils.ProblemURL, "$slug", pd.TitleSlug, 1))
-	markdown += fmt.Sprintln()
-	markdown += fmt.Sprintf("- %s (%s)\n\n", pd.Diffculty, pds.AcceptRate)
+	var tags []string
+	for _, t := range pd.TopicTags {
+		tags = append(tags, fmt.Sprintf("`%s`", t.Name))
+	}
+
+	markdown += fmt.Sprintf("# [%s] %s\n\n", pd.QuestionID, pd.Title)
+	markdown += fmt.Sprintf(
+		"<%s>\n\n",
+		strings.Replace(utils.ProblemURL, "$slug", pd.TitleSlug, 1),
+	)
+	markdown += fmt.Sprintf("- Tags: %s\n\n", strings.Join(tags, ", "))
+	markdown += fmt.Sprintf("- Diffculty: %s\n\n", pd.Diffculty)
+	markdown += fmt.Sprintf("- Acceptance: %s\n\n", pds.AcceptRate)
 	markdown += fmt.Sprintf("- Total Accepted:    %d\n\n", pds.TotalAcceptedRaw)
 	markdown += fmt.Sprintf("- Total Submissions: %d\n\n", pds.TotalSubmissionRaw)
-	markdown += fmt.Sprintln("- Testcase Example:")
-	for _, line := range strings.Split(pd.SampleTestCase, "\n") {
-		markdown += fmt.Sprintf("  %s\n\n", line)
-	}
-	markdown += fmt.Sprintln()
+	markdown += fmt.Sprintf("- Testcase Example: %s\n\n", strings.ReplaceAll(pd.SampleTestCase, "\n", "\\n"))
+	markdown += fmt.Sprintf("## Description\n\n")
 	markdown += fmt.Sprintln(pd.Content)
 
 	if _, err := os.Stat(t.DirTemplate); os.IsNotExist(err) {
