@@ -10,6 +10,7 @@ A cli tool to fight and organize leetcode questions, inspired by [skygragon/leet
 - `user`: leetcode authentication
 
 ## TODOs
+- testing
 - global spinner
 - config management
 - code/comment enhancement
