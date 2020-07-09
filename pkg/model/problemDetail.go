@@ -363,3 +363,50 @@ func (pd ProblemDetail) GetLanguageSlug(ext string) (string, error) {
 
 	return "", fmt.Errorf("question %s does not support file format %s", pd.QuestionID, ext)
 }
+
+// GetLanguageSlug is a mapper function mapping file ext to question slug, with checking
+func (pd ProblemDetail) GetLanguageSlug(ext string) (string, error) {
+	var slug string
+	switch ext {
+	case ".cpp":
+		slug = "cpp"
+	case ".java":
+		slug = "java"
+	case ".py":
+		slug = "python"
+	case ".py3":
+		slug = "python3"
+	case ".c":
+		slug = "c"
+	case ".cs":
+		slug = "csharp"
+	case ".js":
+		slug = "javascript"
+	case ".rb":
+		slug = "ruby"
+	case ".swift":
+		slug = "swift"
+	case ".go":
+		slug = "golang"
+	case ".scala":
+		slug = "scala"
+	case ".kt":
+		slug = "kotlin"
+	case ".rs":
+		slug = "rust"
+	case ".php":
+		slug = "php"
+	case ".ts":
+		slug = "typescript"
+	default:
+		slug = ""
+	}
+
+	for _, pcs := range pd.CodeSnippets {
+		if slug == pcs.LangSlug {
+			return slug, nil
+		}
+	}
+
+	return "", fmt.Errorf("question %s does not support file format %s", pd.QuestionID, ext)
+}
