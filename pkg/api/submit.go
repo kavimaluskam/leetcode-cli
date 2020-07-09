@@ -44,6 +44,7 @@ type submitResp struct {
 	TotalTestcases    int     `json:"total_testcases"`
 }
 
+// SubmitCode to leetcode judge
 func (c *Client) SubmitCode(pd *model.ProblemDetail, fp string) error {
 	ext := filepath.Ext(fp)
 	lang, err := pd.GetLanguageSlug(ext)
