@@ -48,7 +48,7 @@ func (p Problem) GetStatus() string {
 	case "ac": // Problem approved
 		return emoji.Sprint(":heavy_check_mark: ")
 	case "notac": // Problem WIP
-		return emoji.Sprint(":question:")
+		return emoji.Sprint(":x:")
 	default:
 		return "   "
 	}

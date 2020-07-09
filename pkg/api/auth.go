@@ -7,8 +7,12 @@ import (
 	"os"
 	"time"
 
+	"strings"
+
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/input"
+
+	"github.com/kavimaluskam/leetcode-cli/pkg/model"
 	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
 )
 
@@ -139,4 +143,46 @@ func goWaitVisible(page *rod.Page, selector string, errMsg string) <-chan error 
 		}
 	}()
 	return e
+}
+
+func GetSubmitClient(pd *model.ProblemDetail) (*Client, error) {
+	file, _ := ioutil.ReadFile(utils.AuthConfigPath)
+	a := Auth{}
+	_ = json.Unmarshal([]byte(file), &a)
+
+	var opts []ClientOption
+
+	opts = append(
+		opts,
+		AddHeader(
+			"Cookie",
+			fmt.Sprintf(
+				"LEETCODE_SESSION=%s;csrftoken=%s;",
+				a.SessionID,
+				a.SessionCSRF,
+			),
+		),
+	)
+
+	opts = append(
+		opts,
+		AddHeader("X-Requested-With", "XMLHttpRequest"),
+	)
+
+	opts = append(
+		opts,
+		AddHeader("X-CSRFToken", a.SessionCSRF),
+	)
+
+	opts = append(
+		opts,
+		AddHeader("Origin", utils.BaseURL),
+	)
+
+	opts = append(
+		opts,
+		AddHeader("Referer", strings.Replace(utils.SubmitRefererURL, "$slug", pd.TitleSlug, 1)),
+	)
+
+	return NewClient(opts...), nil
 }

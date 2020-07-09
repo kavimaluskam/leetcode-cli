@@ -13,14 +13,10 @@ const (
 	ProblemListingURL = "https://leetcode.com/api/problems/$category/"
 	ProblemQueryURL   = "https://leetcode.com/problems/api/filter-questions/$query"
 	ProblemURL        = "https://leetcode.com/problems/$slug/description/"
-	TestURL           = "https://leetcode.com/problems/$slug/interpret_solution/"
-	SessionURL        = "https://leetcode.com/session/"
 	SubmitURL         = "https://leetcode.com/problems/$slug/submit/"
-	SubmissionsURL    = "https://leetcode.com/api/submissions/$slug"
-	SubmissionURL     = "https://leetcode.com/submissions/detail/$id/"
+	SubmitRefererURL  = "https://leetcode.com/problems/$slug/submissions/"
+	InterpretURL      = "https://leetcode.com/problems/$slug/interpret_solution/"
 	VerifyURL         = "https://leetcode.com/submissions/detail/$id/check/"
-	FavoritesURL      = "https://leetcode.com/list/api/questions"
-	FavoriteDeleteURL = "https://leetcode.com/list/api/questions/$hash/$id"
 )
 
 // Local Path for configuration
