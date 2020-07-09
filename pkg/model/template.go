@@ -33,7 +33,6 @@ func GetFileTemplate(pd ProblemDetail) (*Template, error) {
 	if t.DirTemplate != "" {
 		t.DirTemplate = strings.ReplaceAll(t.DirTemplate, "$questionID", pd.QuestionID)
 		t.DirTemplate = strings.ReplaceAll(t.DirTemplate, "$questionSlug", pd.TitleSlug)
-		t.DirTemplate = fmt.Sprintf("./%s", t.DirTemplate)
 	}
 
 	if t.MarkdownTemplate != "" {
