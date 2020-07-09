@@ -63,11 +63,8 @@ func (c *Client) InterpretCode(pd *model.ProblemDetail, fp string, dataInput str
 		return err
 	}
 
-<<<<<<< HEAD
 	dataInput = strings.ReplaceAll(dataInput, "\\n", "\n")
 
-=======
->>>>>>> f9dec035ac78a1bb357b39640f8fdfa5d7b7d5f5
 	url := strings.Replace(utils.InterpretURL, "$slug", pd.TitleSlug, 1)
 
 	reqBody, err := json.Marshal(
@@ -83,19 +80,13 @@ func (c *Client) InterpretCode(pd *model.ProblemDetail, fp string, dataInput str
 		return err
 	}
 
-<<<<<<< HEAD
 	iir := &interpretInitResp{}
 	err = c.REST("POST", url, bytes.NewBuffer(reqBody), iir)
-=======
-	ir := &interpretInitResp{}
-	err = c.REST("POST", url, bytes.NewBuffer(reqBody), ir)
->>>>>>> f9dec035ac78a1bb357b39640f8fdfa5d7b7d5f5
 	if err != nil {
 		return err
 	}
 
 	for {
-<<<<<<< HEAD
 		ir, err := c.verifyInterpretation(iir.InterpretID)
 		if err != nil {
 			return err
@@ -107,20 +98,6 @@ func (c *Client) InterpretCode(pd *model.ProblemDetail, fp string, dataInput str
 			return nil
 		default:
 			return fmt.Errorf("failure code submission. unexpected submission state: %s", ir.State)
-=======
-		vr, err := c.verifyInterpretation(ir.InterpretID)
-		if err != nil {
-			return err
-		}
-		switch vr.State {
-		case "PENDING":
-		case "SUCCESS":
-			// TODO: handle resp properly
-			fmt.Printf("%+v\n", vr)
-			return nil
-		default:
-			return fmt.Errorf("failure code submission. unexpected submission state: %s", vr.State)
->>>>>>> f9dec035ac78a1bb357b39640f8fdfa5d7b7d5f5
 		}
 		time.Sleep(2 * time.Second)
 	}
@@ -135,7 +112,6 @@ func (c *Client) verifyInterpretation(id string) (*interpretResp, error) {
 	}
 	return ir, nil
 }
-<<<<<<< HEAD
 
 func (ir *interpretResp) exportSdtoutInterpretation() {
 	if ir.CorrectAnswer {
@@ -154,5 +130,3 @@ func (ir *interpretResp) exportSdtoutInterpretation() {
 	fmt.Printf("Expected  %.2f MB\n", float32(ir.ExpectedMemory)/float32(1024)/float32(1024))
 	fmt.Printf("Actual    %s\n", ir.StatusMemory)
 }
-=======
->>>>>>> f9dec035ac78a1bb357b39640f8fdfa5d7b7d5f5
