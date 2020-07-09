@@ -22,6 +22,7 @@ type submitResp struct {
 	CodeOutput        string  `json:"code_output"`
 	CompareResult     string  `json:"compare_result"`
 	ElapsedTime       int     `json:"elapsed_time"`
+	ExpectedOutput    string  `json:"expected_output"`
 	FullRuntimeError  string  `json:"full_runtime_error"`
 	Lang              string  `json:"lang"`
 	LastTestcase      string  `json:"last_testcase"`
@@ -82,8 +83,7 @@ func (c *Client) SubmitCode(pd *model.ProblemDetail, fp string) error {
 		switch vr.State {
 		case "PENDING", "STARTED":
 		case "SUCCESS":
-			// TODO: handle resp properly
-			fmt.Printf("%+v\n", vr)
+			vr.exportSdtoutSubmission()
 			return nil
 		default:
 			return fmt.Errorf("failure code submission. unexpected submission state: %s", vr.State)
@@ -101,4 +101,25 @@ func (c *Client) verifySubmission(id int) (*submitResp, error) {
 		return nil, err
 	}
 	return vr, nil
+}
+
+func (vr *submitResp) exportSdtoutSubmission() {
+	if vr.StatusMsg == "Accepted" {
+		fmt.Printf("%s\n", utils.Green("Accepted"))
+		fmt.Printf("%d/%d test cases passed\n\n", vr.TotalCorrect, vr.TotalTestcases)
+		fmt.Printf("%s\n", utils.Blue("Runtime"))
+		fmt.Printf("%s, faster than %.2f%% submissions\n\n", vr.StatusRuntime, vr.RuntimePercentile)
+		fmt.Printf("%s\n", utils.Blue("Memory"))
+		fmt.Printf("%s, less than %.2f%% submissions\n\n", vr.StatusMemory, vr.MemoryPercentile)
+	} else {
+		fmt.Printf("%s\n", utils.Red("Rejected"))
+		fmt.Printf("%d/%d test cases passed\n\n", vr.TotalCorrect, vr.TotalTestcases)
+		fmt.Printf(
+			utils.Red(
+				fmt.Sprintf("Test Case  %s\n", strings.ReplaceAll(vr.LastTestcase, "\n", "\\n")),
+			),
+		)
+		fmt.Printf("Expected   %s\n", vr.ExpectedOutput)
+		fmt.Printf("Actual     %s\n", vr.CodeOutput)
+	}
 }

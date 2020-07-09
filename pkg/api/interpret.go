@@ -63,6 +63,8 @@ func (c *Client) InterpretCode(pd *model.ProblemDetail, fp string, dataInput str
 		return err
 	}
 
+	dataInput = strings.ReplaceAll(dataInput, "\\n", "\n")
+
 	url := strings.Replace(utils.InterpretURL, "$slug", pd.TitleSlug, 1)
 
 	reqBody, err := json.Marshal(
@@ -78,25 +80,24 @@ func (c *Client) InterpretCode(pd *model.ProblemDetail, fp string, dataInput str
 		return err
 	}
 
-	ir := &interpretInitResp{}
-	err = c.REST("POST", url, bytes.NewBuffer(reqBody), ir)
+	iir := &interpretInitResp{}
+	err = c.REST("POST", url, bytes.NewBuffer(reqBody), iir)
 	if err != nil {
 		return err
 	}
 
 	for {
-		vr, err := c.verifyInterpretation(ir.InterpretID)
+		ir, err := c.verifyInterpretation(iir.InterpretID)
 		if err != nil {
 			return err
 		}
-		switch vr.State {
+		switch ir.State {
 		case "PENDING", "STARTED":
 		case "SUCCESS":
-			// TODO: handle resp properly
-			fmt.Printf("%+v\n", vr)
+			ir.exportSdtoutInterpretation()
 			return nil
 		default:
-			return fmt.Errorf("failure code submission. unexpected submission state: %s", vr.State)
+			return fmt.Errorf("failure code submission. unexpected submission state: %s", ir.State)
 		}
 		time.Sleep(2 * time.Second)
 	}
@@ -110,4 +111,22 @@ func (c *Client) verifyInterpretation(id string) (*interpretResp, error) {
 		return nil, err
 	}
 	return ir, nil
+}
+
+func (ir *interpretResp) exportSdtoutInterpretation() {
+	if ir.CorrectAnswer {
+		fmt.Printf("%s\n\n", utils.Green("Accepted"))
+	} else {
+		fmt.Printf("%s\n\n", utils.Red("Rejected"))
+	}
+
+	fmt.Printf("%s\n", utils.Blue("Anwser"))
+	fmt.Printf("Expected  %s\n", strings.Join(ir.ExpectedCodeAnswer, ", "))
+	fmt.Printf("Actual    %s\n\n", strings.Join(ir.CodeAnswer, ", "))
+	fmt.Printf("%s\n", utils.Blue("Runtime"))
+	fmt.Printf("Expected  %s ms\n", ir.ExpectedStatusRuntime)
+	fmt.Printf("Actual    %s\n\n", ir.StatusRuntime)
+	fmt.Printf("%s\n", utils.Blue("Memory"))
+	fmt.Printf("Expected  %.2f MB\n", float32(ir.ExpectedMemory)/float32(1024)/float32(1024))
+	fmt.Printf("Actual    %s\n", ir.StatusMemory)
 }
