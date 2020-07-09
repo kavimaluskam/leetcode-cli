@@ -9,22 +9,24 @@ import (
 )
 
 func init() {
-	RootCmd.AddCommand(submitCmd)
-	submitCmd.PersistentFlags().IntP("id", "i", 0, "ID of problem to be submitted")
-	submitCmd.PersistentFlags().StringP("file", "f", "", "path of file to be submitted")
+	RootCmd.AddCommand(interpretCmd)
+	interpretCmd.PersistentFlags().IntP("id", "i", 0, "ID of problem to be submitted")
+	interpretCmd.PersistentFlags().StringP("file", "f", "", "path of file to be submitted")
+	interpretCmd.PersistentFlags().StringP("test_input", "t", "", "test input to be submitted")
 }
 
-var submitCmd = &cobra.Command{
-	Use:   `submit`,
-	Short: `Submit code`,
-	Long:  `Submit local code to leetcode problem`,
+var interpretCmd = &cobra.Command{
+	Use:   `interpret`,
+	Short: `Interpret code`,
+	Long:  `Tnterpret local code to leetcode problem with testing input`,
 	Args:  arg.Submit,
 	RunE:  submit,
 }
 
-func submit(cmd *cobra.Command, args []string) error {
+func interpret(cmd *cobra.Command, args []string) error {
 	id, _ := cmd.Flags().GetInt("id")
 	file, _ := cmd.Flags().GetString("file")
+	testInput, _ := cmd.Flags().GetString("test_input")
 
 	fp, err := filepath.Abs(file)
 	if err != nil {
@@ -46,7 +48,7 @@ func submit(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	err = sClient.SubmitCode(problemDetail, fp)
+	err = sClient.InterpretCode(problemDetail, fp, testInput)
 	if err != nil {
 		return err
 	}
