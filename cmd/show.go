@@ -40,16 +40,10 @@ func show(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if generate {
-		err = problemDetail.GenerateDetail(language)
-		if err != nil {
-			return err
-		}
-	} else {
-		err = problemDetail.ExportStdoutDetail()
-		if err != nil {
-			return err
-		}
+	err = problemDetail.ExportDetail(generate, language)
+	if err != nil {
+		return err
 	}
+
 	return nil
 }
