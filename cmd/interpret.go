@@ -19,8 +19,8 @@ var interpretCmd = &cobra.Command{
 	Use:   `interpret`,
 	Short: `Interpret code`,
 	Long:  `Tnterpret local code to leetcode problem with testing input`,
-	Args:  arg.Submit,
-	RunE:  submit,
+	Args:  arg.Interpret,
+	RunE:  interpret,
 }
 
 func interpret(cmd *cobra.Command, args []string) error {
