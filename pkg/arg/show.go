@@ -29,6 +29,13 @@ func Show(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	summary, err := cmd.Flags().GetBool("summary")
+	if err != nil {
+		return err
+	}
+	if summary && generate == false {
+		return fmt.Errorf("invalid arguments: 'summary' should only be applied with 'generate'")
+	}
 	language, err := cmd.Flags().GetString("language")
 	if err != nil {
 		return err

@@ -13,6 +13,7 @@ func init() {
 	showCmd.Flags().BoolP("random", "r", false, "Random choice of problem to be shown")
 	showCmd.Flags().BoolP("generate", "g", false, "Generate source code")
 	showCmd.Flags().StringP("language", "l", "", "Open source code in editor")
+	showCmd.Flags().BoolP("summary", "s", false, "Print out generation summary")
 }
 
 var showCmd = &cobra.Command{
@@ -30,6 +31,7 @@ func show(cmd *cobra.Command, args []string) error {
 	random, _ := cmd.Flags().GetBool("random")
 	generate, _ := cmd.Flags().GetBool("generate")
 	language, _ := cmd.Flags().GetString("language")
+	summary, _ := cmd.Flags().GetBool("summary")
 
 	client, err := api.GetAuthClient()
 	if err != nil {
@@ -41,7 +43,7 @@ func show(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	err = problemDetail.ExportDetail(generate, language)
+	err = problemDetail.ExportDetail(generate, language, summary)
 	if err != nil {
 		return err
 	}

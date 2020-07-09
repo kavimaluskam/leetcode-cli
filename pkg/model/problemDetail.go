@@ -157,7 +157,7 @@ func (pd ProblemDetail) GetStats() (*ProblemStats, error) {
 }
 
 // ExportDetail generate source code in local directory
-func (pd ProblemDetail) ExportDetail(generate bool, language string) error {
+func (pd ProblemDetail) ExportDetail(generate bool, language string, summary bool) error {
 	sourceCodePath := ""
 
 	if generate == false {
@@ -179,6 +179,10 @@ func (pd ProblemDetail) ExportDetail(generate bool, language string) error {
 	err = pd.generateMarkdown(t, sourceCodePath)
 	if err != nil {
 		return err
+	}
+
+	if summary {
+		pd.exportGenerateSummary(t)
 	}
 
 	return nil
@@ -315,6 +319,21 @@ func (pd ProblemDetail) generateSourceCode(t *Template, language string) (string
 	errMessage := fmt.Sprintf("invalid language '%s' for problem: '%s'", language, pd.Title)
 	errMessage += fmt.Sprintf(" with supported language:\n[%s]", strings.Join(supportedLanguage, ", "))
 	return "", fmt.Errorf(errMessage)
+}
+
+func (pd ProblemDetail) exportGenerateSummary(t *Template) {
+	var tags []string
+	for _, tag := range pd.TopicTags {
+		tags = append(tags, tag.Name)
+	}
+
+	fmt.Printf(
+		"| [%s](%s) | %s | %s |",
+		pd.Title,
+		t.DirTemplate,
+		strings.Join(tags, ", "),
+		pd.Diffculty,
+	)
 }
 
 // GetLanguageSlug is a mapper function mapping file ext to question slug, with checking
