@@ -11,6 +11,7 @@ import (
 
 	"github.com/kavimaluskam/leetcode-cli/pkg/model"
 	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
+	"github.com/kyokomi/emoji"
 )
 
 type interpretInitResp struct {
@@ -95,7 +96,7 @@ func (c *Client) InterpretCode(pd *model.ProblemDetail, fp string, dataInput str
 		switch ir.State {
 		case "PENDING", "STARTED":
 		case "SUCCESS":
-			ir.exportSdtoutInterpretation()
+			ir.exportSdtoutInterpretation(dataInput)
 			return nil
 		default:
 			return fmt.Errorf("failure code submission. unexpected submission state: %s", ir.State)
@@ -114,20 +115,30 @@ func (c *Client) verifyInterpretation(id string) (*interpretResp, error) {
 	return ir, nil
 }
 
-func (ir *interpretResp) exportSdtoutInterpretation() {
+func (ir *interpretResp) exportSdtoutInterpretation(t string) {
 	if ir.CorrectAnswer {
-		fmt.Printf("%s\n\n", utils.Green("Accepted"))
+		emoji.Printf("%s :heavy_check_mark:\n\n", utils.Green("Accepted"))
 	} else {
-		fmt.Printf("%s\n\n", utils.Red("Rejected"))
+		emoji.Printf("%s :x:\n\n", utils.Red("Rejected"))
 	}
 
-	fmt.Printf("%s\n", utils.Blue("Anwser"))
-	fmt.Printf("Expected  %s\n", strings.Join(ir.ExpectedCodeAnswer, ", "))
-	fmt.Printf("Actual    %s\n\n", strings.Join(ir.CodeAnswer, ", "))
-	fmt.Printf("%s\n", utils.Blue("Runtime"))
-	fmt.Printf("Expected  %s ms\n", ir.ExpectedStatusRuntime)
-	fmt.Printf("Actual    %s\n\n", ir.StatusRuntime)
-	fmt.Printf("%s\n", utils.Blue("Memory"))
-	fmt.Printf("Expected  %.2f MB\n", float32(ir.ExpectedMemory)/float32(1024)/float32(1024))
-	fmt.Printf("Actual    %s\n", ir.StatusMemory)
+	fmt.Printf(
+		"%s\n%s",
+		utils.Cyan("Test Case"),
+		fmt.Sprintf("%s\n\n", strings.ReplaceAll(t, "\n", "\\n")),
+	)
+
+	if ir.FullRuntimeError != "" {
+		fmt.Printf("%s\n%s\n", utils.Red("Runtime Error"), utils.Magenta(ir.FullRuntimeError))
+	} else {
+		fmt.Printf("%s\n", utils.Blue("Anwser"))
+		fmt.Printf("Expected: %s\n", strings.Join(ir.ExpectedCodeAnswer, ", "))
+		fmt.Printf("Actual:   %s\n\n", strings.Join(ir.CodeAnswer, ", "))
+		fmt.Printf("%s\n", utils.Blue("Runtime"))
+		fmt.Printf("Expected: %s ms\n", ir.ExpectedStatusRuntime)
+		fmt.Printf("Actual:   %s\n\n", ir.StatusRuntime)
+		fmt.Printf("%s\n", utils.Blue("Memory"))
+		fmt.Printf("Expected: %.2f MB\n", float32(ir.ExpectedMemory)/float32(1024)/float32(1024))
+		fmt.Printf("Actual:   %s\n", ir.StatusMemory)
+	}
 }

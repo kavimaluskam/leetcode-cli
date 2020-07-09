@@ -11,6 +11,7 @@ import (
 
 	"github.com/kavimaluskam/leetcode-cli/pkg/model"
 	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
+	"github.com/kyokomi/emoji"
 )
 
 type submitInitResp struct {
@@ -106,21 +107,27 @@ func (c *Client) verifySubmission(id int) (*submitResp, error) {
 
 func (vr *submitResp) exportSdtoutSubmission() {
 	if vr.StatusMsg == "Accepted" {
-		fmt.Printf("%s\n", utils.Green("Accepted"))
+		emoji.Printf("%s :heavy_check_mark:\n", utils.Green("Accepted"))
 		fmt.Printf("%d/%d test cases passed\n\n", vr.TotalCorrect, vr.TotalTestcases)
 		fmt.Printf("%s\n", utils.Blue("Runtime"))
 		fmt.Printf("%s, faster than %.2f%% submissions\n\n", vr.StatusRuntime, vr.RuntimePercentile)
 		fmt.Printf("%s\n", utils.Blue("Memory"))
-		fmt.Printf("%s, less than %.2f%% submissions\n\n", vr.StatusMemory, vr.MemoryPercentile)
+		fmt.Printf("%s, less than %.2f%% submissions\n", vr.StatusMemory, vr.MemoryPercentile)
 	} else {
-		fmt.Printf("%s\n", utils.Red("Rejected"))
+		emoji.Printf("%s :x:\n", utils.Red("Rejected"))
 		fmt.Printf("%d/%d test cases passed\n\n", vr.TotalCorrect, vr.TotalTestcases)
 		fmt.Printf(
-			utils.Red(
-				fmt.Sprintf("Test Case  %s\n", strings.ReplaceAll(vr.LastTestcase, "\n", "\\n")),
-			),
+			"%s\n%s",
+			utils.Cyan("Last Test Case"),
+			fmt.Sprintf("%s\n\n", strings.ReplaceAll(vr.LastTestcase, "\n", "\\n")),
 		)
-		fmt.Printf("Expected   %s\n", vr.ExpectedOutput)
-		fmt.Printf("Actual     %s\n", vr.CodeOutput)
+
+		if vr.FullRuntimeError != "" {
+			fmt.Printf("%s\n%s\n", utils.Red("Runtime Error"), utils.Magenta(vr.FullRuntimeError))
+		} else {
+			fmt.Printf("%s\n", utils.Red("Wrong Answer"))
+			fmt.Printf("Expected   %s\n", vr.ExpectedOutput)
+			fmt.Printf("Actual     %s\n", vr.CodeOutput)
+		}
 	}
 }
