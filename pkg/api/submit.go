@@ -22,6 +22,7 @@ type submitResp struct {
 	CodeOutput        string  `json:"code_output"`
 	CompareResult     string  `json:"compare_result"`
 	ElapsedTime       int     `json:"elapsed_time"`
+	FullRuntimeError  string  `json:"full_runtime_error"`
 	Lang              string  `json:"lang"`
 	LastTestcase      string  `json:"last_testcase"`
 	Memory            int     `json:"memory"`
@@ -29,6 +30,7 @@ type submitResp struct {
 	PrettyLang        string  `json:"pretty_lang"`
 	QuestionID        string  `json:"question_id"`
 	RunSuccess        bool    `json:"run_success"`
+	RuntimeError      string  `json:"runtime_error"`
 	RuntimePercentile float32 `json:"runtime_percentile"`
 	StatusCode        int     `json:"status_code"`
 	StatusMemory      string  `json:"status_memory"`
@@ -78,7 +80,7 @@ func (c *Client) SubmitCode(pd *model.ProblemDetail, fp string) error {
 			return err
 		}
 		switch vr.State {
-		case "PENDING":
+		case "PENDING", "STARTED":
 		case "SUCCESS":
 			// TODO: handle resp properly
 			fmt.Printf("%+v\n", vr)

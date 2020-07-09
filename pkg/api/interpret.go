@@ -90,7 +90,7 @@ func (c *Client) InterpretCode(pd *model.ProblemDetail, fp string, dataInput str
 			return err
 		}
 		switch vr.State {
-		case "PENDING":
+		case "PENDING", "STARTED":
 		case "SUCCESS":
 			// TODO: handle resp properly
 			fmt.Printf("%+v\n", vr)
