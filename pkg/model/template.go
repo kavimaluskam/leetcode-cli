@@ -2,7 +2,6 @@ package model
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"strings"
 
@@ -33,20 +32,17 @@ func GetFileTemplate(pd ProblemDetail) (*Template, error) {
 	if t.DirTemplate != "" {
 		t.DirTemplate = strings.ReplaceAll(t.DirTemplate, "$questionID", pd.QuestionID)
 		t.DirTemplate = strings.ReplaceAll(t.DirTemplate, "$questionSlug", pd.TitleSlug)
-		t.DirTemplate = fmt.Sprintf("./%s", t.DirTemplate)
 	}
 
 	if t.MarkdownTemplate != "" {
 		t.MarkdownTemplate = strings.ReplaceAll(t.MarkdownTemplate, "$questionID", pd.QuestionID)
 		t.MarkdownTemplate = strings.ReplaceAll(t.MarkdownTemplate, "$questionSlug", pd.TitleSlug)
-		t.MarkdownTemplate = fmt.Sprintf("%s/%s", t.DirTemplate, t.MarkdownTemplate)
 	}
 
 	if t.SourceCodeTemplate != "" {
 		t.SourceCodeTemplate = strings.ReplaceAll(t.SourceCodeTemplate, "$questionID", pd.QuestionID)
 		t.SourceCodeTemplate = strings.ReplaceAll(t.SourceCodeTemplate, "$questionSlug", pd.TitleSlug)
 		t.SourceCodeTemplate = strings.ReplaceAll(t.SourceCodeTemplate, "$submissionID", "1")
-		t.SourceCodeTemplate = fmt.Sprintf("%s/%s", t.DirTemplate, t.SourceCodeTemplate)
 	}
 
 	return &t, nil

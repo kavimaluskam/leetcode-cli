@@ -155,8 +155,35 @@ func (pd ProblemDetail) GetStats() (*ProblemStats, error) {
 	return ps, nil
 }
 
-// ExportStdoutDetail prints problem detail in stdout
-func (pd ProblemDetail) ExportStdoutDetail() error {
+// ExportDetail generate source code in local directory
+func (pd ProblemDetail) ExportDetail(generate bool, language string) error {
+	sourceCodePath := ""
+
+	if generate == false {
+		return pd.exportStdoutDetail()
+	}
+
+	t, err := GetFileTemplate(pd)
+	if err != nil {
+		return err
+	}
+
+	if language != "" {
+		sourceCodePath, err = pd.generateSourceCode(t, language)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = pd.generateMarkdown(t, sourceCodePath)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (pd ProblemDetail) exportStdoutDetail() error {
 	pds, err := pd.GetStats()
 	if err != nil {
 		return err
@@ -185,28 +212,7 @@ func (pd ProblemDetail) ExportStdoutDetail() error {
 	return nil
 }
 
-// GenerateDetail generate source code in local directory
-func (pd ProblemDetail) GenerateDetail(language string) error {
-	t, err := GetFileTemplate(pd)
-	if err != nil {
-		return err
-	}
-
-	err = pd.GenerateMarkdown(t)
-	if err != nil {
-		return err
-	}
-
-	err = pd.GenerateSourceCode(t, language)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// GenerateMarkdown generate markdown with problem description
-func (pd ProblemDetail) GenerateMarkdown(t *Template) error {
+func (pd ProblemDetail) generateMarkdown(t *Template, sourceCodePath string) error {
 	markdown := ""
 
 	pds, err := pd.GetStats()
@@ -226,8 +232,11 @@ func (pd ProblemDetail) GenerateMarkdown(t *Template) error {
 	)
 	markdown += fmt.Sprintf("- Tags: %s\n\n", strings.Join(tags, ", "))
 	markdown += fmt.Sprintf("- Diffculty: %s\n\n", pd.Diffculty)
+	if sourceCodePath != "" {
+		markdown += fmt.Sprintf("- Source Code: [./%s](./%s)\n\n", sourceCodePath, sourceCodePath)
+	}
 	markdown += fmt.Sprintf("- Acceptance: %s\n\n", pds.AcceptRate)
-	markdown += fmt.Sprintf("- Total Accepted:    %d\n\n", pds.TotalAcceptedRaw)
+	markdown += fmt.Sprintf("- Total Accepted: %d\n\n", pds.TotalAcceptedRaw)
 	markdown += fmt.Sprintf("- Total Submissions: %d\n\n", pds.TotalSubmissionRaw)
 	markdown += fmt.Sprintf("- Testcase Example: %s\n\n", strings.ReplaceAll(pd.SampleTestCase, "\n", "\\n"))
 	markdown += fmt.Sprintf("## Description\n\n")
@@ -237,7 +246,13 @@ func (pd ProblemDetail) GenerateMarkdown(t *Template) error {
 		os.Mkdir(t.DirTemplate, os.ModePerm)
 	}
 
-	f, err := os.Create(t.MarkdownTemplate)
+	f, err := os.Create(
+		fmt.Sprintf(
+			"%s/%s",
+			t.DirTemplate,
+			t.MarkdownTemplate,
+		),
+	)
 	if err != nil {
 		return fmt.Errorf(err.Error())
 	}
@@ -254,8 +269,7 @@ func (pd ProblemDetail) GenerateMarkdown(t *Template) error {
 	return nil
 }
 
-// GenerateSourceCode generate source code with sepcified language
-func (pd ProblemDetail) GenerateSourceCode(t *Template, language string) error {
+func (pd ProblemDetail) generateSourceCode(t *Template, language string) (string, error) {
 	var supportedLanguage []string
 	for _, codeSnippet := range pd.CodeSnippets {
 		supportedLanguage = append(
@@ -273,25 +287,31 @@ func (pd ProblemDetail) GenerateSourceCode(t *Template, language string) error {
 				codeSnippet.GetLanguageExt(),
 			)
 
-			f, err := os.Create(t.SourceCodeTemplate)
+			f, err := os.Create(
+				fmt.Sprintf(
+					"%s/%s",
+					t.DirTemplate,
+					t.SourceCodeTemplate,
+				),
+			)
 			if err != nil {
-				return fmt.Errorf(err.Error())
+				return "", fmt.Errorf(err.Error())
 			}
 
 			defer f.Close()
 
 			_, err = f.WriteString(codeSnippet.Code)
 			if err != nil {
-				return fmt.Errorf(err.Error())
+				return "", fmt.Errorf(err.Error())
 			}
 
 			f.Sync()
 
-			return nil
+			return t.SourceCodeTemplate, nil
 		}
 	}
 
 	errMessage := fmt.Sprintf("invalid language '%s' for problem: '%s'", language, pd.Title)
 	errMessage += fmt.Sprintf(" with supported language:\n[%s]", strings.Join(supportedLanguage, ", "))
-	return fmt.Errorf(errMessage)
+	return "", fmt.Errorf(errMessage)
 }
