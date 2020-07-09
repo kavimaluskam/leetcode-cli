@@ -328,7 +328,8 @@ func (pd ProblemDetail) exportGenerateSummary(t *Template) {
 	}
 
 	fmt.Printf(
-		"| [%s](%s) | %s | %s |",
+		"| %s | [%s](%s) | %s | %s |",
+		pd.QuestionID,
 		pd.Title,
 		t.DirTemplate,
 		strings.Join(tags, ", "),
