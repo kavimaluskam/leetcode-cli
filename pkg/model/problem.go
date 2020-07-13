@@ -20,8 +20,8 @@ type Problem struct {
 		FrontendQuestionID  int    `json:"frontend_question_id"`
 		IsNewQuestion       bool   `json:"is_new_question"`
 	} `json:"stat"`
-	Status    string `json:"status"`
-	Diffculty struct {
+	Status     string `json:"status"`
+	Difficulty struct {
 		Level int `json:"level"`
 	} `json:"difficulty"`
 	PaidOnly  bool `json:"paid_only"`
@@ -30,9 +30,9 @@ type Problem struct {
 	Progress  int  `json:"progress"`
 }
 
-// GetDiffculty is a mapper function from problem diffculty level to string
-func (p Problem) GetDiffculty(format string) string {
-	switch p.Diffculty.Level {
+// GetDifficulty is a mapper function from problem Difficulty level to string
+func (p Problem) GetDifficulty(format string) string {
+	switch p.Difficulty.Level {
 	case 1:
 		return utils.GreenFormatted("Easy", format)
 	case 2:
@@ -105,7 +105,7 @@ func (p Problem) ExportStdoutListing() {
 		p.GetStatus(),
 		p.Stat.QuestionID,
 		p.Stat.QuestionTitle,
-		p.GetDiffculty("%-6s"),
+		p.GetDifficulty("%-6s"),
 		(float64(p.Stat.TotalAcs) / float64(p.Stat.TotalSubmitted)),
 	)
 

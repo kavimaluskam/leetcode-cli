@@ -18,7 +18,7 @@ func init() {
 var interpretCmd = &cobra.Command{
 	Use:   `interpret`,
 	Short: `Interpret code`,
-	Long:  `Tnterpret local code to leetcode problem with testing input`,
+	Long:  `Interpret local code to leetcode problem with testing input`,
 	Args:  arg.Interpret,
 	RunE:  interpret,
 }

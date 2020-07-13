@@ -44,7 +44,7 @@ func (a *Auth) SetAuthCredentials() error {
 	file, err := json.Marshal(a)
 	if err != nil {
 		// TODO: enhance error type handling
-		return fmt.Errorf("Error on processing authencation json: %s", err.Error())
+		return fmt.Errorf("Error on processing authentication json: %s", err.Error())
 	}
 
 	err = ioutil.WriteFile(utils.AuthConfigPath, file, os.ModePerm)

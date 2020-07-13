@@ -32,7 +32,7 @@ func List(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	if !utils.Contains([]interface{}{"all", "free", "locked"}, lock) {
-		return fmt.Errorf("invalid arguemnts: %s = %s", "lock", lock)
+		return fmt.Errorf("invalid arguments: %s = %s", "lock", lock)
 	}
 
 	status, err := cmd.Flags().GetString("status")
