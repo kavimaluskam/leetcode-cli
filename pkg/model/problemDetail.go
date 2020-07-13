@@ -20,9 +20,9 @@ type ProblemDetail struct {
 	TitleSlug             string                `json:"titleSlug"`
 	Content               string                `json:"content"`
 	TranslatedTitle       string                `json:"translatedTitle"`
-	TrnslatedContent      string                `json:"translatedContent"`
+	TranslatedContent     string                `json:"translatedContent"`
 	IsPaidOnly            bool                  `json:"isPaidOnly"`
-	Diffculty             string                `json:"difficulty"`
+	Difficulty            string                `json:"difficulty"`
 	Likes                 int                   `json:"likes"`
 	Dislikes              int                   `json:"dislikes"`
 	IsLiked               bool                  `json:"isLiked"`
@@ -134,9 +134,9 @@ type ProblemStats struct {
 	AcceptRate         string `json:"acRate"`
 }
 
-// GetDiffculty is a mapper function from problem diffculty level to string
-func (pd ProblemDetail) GetDiffculty() string {
-	switch pd.Diffculty {
+// GetDifficulty is a mapper function from problem Difficulty level to string
+func (pd ProblemDetail) GetDifficulty() string {
+	switch pd.Difficulty {
 	case "Easy":
 		return utils.Green("Easy")
 	case "Medium":
@@ -208,7 +208,7 @@ func (pd ProblemDetail) exportStdoutDetail() error {
 	fmt.Printf("[%s] %s\n\n", pd.QuestionID, pd.Title)
 	fmt.Printf("%s\n\n", utils.Gray(strings.Replace(utils.ProblemURL, "$slug", pd.TitleSlug, 1)))
 	fmt.Printf("Tags: %s \n\n", strings.Join(tags, ", "))
-	fmt.Printf("* %s (%s)\n", pd.GetDiffculty(), pds.AcceptRate)
+	fmt.Printf("* %s (%s)\n", pd.GetDifficulty(), pds.AcceptRate)
 	fmt.Printf("* Total Accepted:    %d\n", pds.TotalAcceptedRaw)
 	fmt.Printf("* Total Submissions: %d\n", pds.TotalSubmissionRaw)
 	fmt.Printf("* Testcase Example: %s\n\n", strings.ReplaceAll(pd.SampleTestCase, "\n", "\\n"))
@@ -236,7 +236,7 @@ func (pd ProblemDetail) generateMarkdown(t *Template, sourceCodePath string) err
 		strings.Replace(utils.ProblemURL, "$slug", pd.TitleSlug, 1),
 	)
 	markdown += fmt.Sprintf("- Tags: %s\n\n", strings.Join(tags, ", "))
-	markdown += fmt.Sprintf("- Diffculty: %s\n\n", pd.Diffculty)
+	markdown += fmt.Sprintf("- Difficulty: %s\n\n", pd.Difficulty)
 	if sourceCodePath != "" {
 		markdown += fmt.Sprintf("- Source Code: [./%s](./%s)\n\n", sourceCodePath, sourceCodePath)
 	}
@@ -333,7 +333,7 @@ func (pd ProblemDetail) exportGenerateSummary(t *Template) {
 		pd.Title,
 		t.DirTemplate,
 		strings.Join(tags, ", "),
-		pd.Diffculty,
+		pd.Difficulty,
 	)
 }
 
