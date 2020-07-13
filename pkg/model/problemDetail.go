@@ -20,7 +20,7 @@ type ProblemDetail struct {
 	TitleSlug             string                `json:"titleSlug"`
 	Content               string                `json:"content"`
 	TranslatedTitle       string                `json:"translatedTitle"`
-	TrnslatedContent      string                `json:"translatedContent"`
+	TranslatedContent     string                `json:"translatedContent"`
 	IsPaidOnly            bool                  `json:"isPaidOnly"`
 	Difficulty            string                `json:"difficulty"`
 	Likes                 int                   `json:"likes"`

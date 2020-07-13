@@ -131,7 +131,7 @@ func (ir *interpretResp) exportSdtoutInterpretation(t string) {
 	if ir.FullRuntimeError != "" {
 		fmt.Printf("%s\n%s\n", utils.Red("Runtime Error"), utils.Magenta(ir.FullRuntimeError))
 	} else {
-		fmt.Printf("%s\n", utils.Blue("Anwser"))
+		fmt.Printf("%s\n", utils.Blue("Answer"))
 		fmt.Printf("Expected: %s\n", strings.Join(ir.ExpectedCodeAnswer, ", "))
 		fmt.Printf("Actual:   %s\n\n", strings.Join(ir.CodeAnswer, ", "))
 		fmt.Printf("%s\n", utils.Blue("Runtime"))
