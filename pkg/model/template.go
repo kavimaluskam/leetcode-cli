@@ -4,20 +4,21 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"strings"
+	"text/template"
 
 	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
 )
 
 // Template is the config of leetcode stored in local
-type Template struct {
-	DirTemplate        string `json:"dirTemplate"`
-	MarkdownTemplate   string `json:"markdownTemplate"`
-	SourceCodeTemplate string `json:"sourceCodeTemplate"`
+type FileTemplate struct {
+	MarkdownPath     string `json:"markDownPath"`
+	SourceCodePath   string `json:"sourceCodePath"`
+	MarkdownTemplate *template.Template
 }
 
 // GetFileTemplate returns a basic API template struct based on local template config
-func GetFileTemplate(pd ProblemDetail) (*Template, error) {
-	t := Template{}
+func GetFileTemplate(pd ProblemDetail) (*FileTemplate, error) {
+	t := FileTemplate{}
 
 	file, err := ioutil.ReadFile(utils.TemplateConfigPath)
 	if err != nil {
@@ -29,21 +30,22 @@ func GetFileTemplate(pd ProblemDetail) (*Template, error) {
 		return &t, err
 	}
 
-	if t.DirTemplate != "" {
-		t.DirTemplate = strings.ReplaceAll(t.DirTemplate, "$questionID", pd.QuestionFrontendID)
-		t.DirTemplate = strings.ReplaceAll(t.DirTemplate, "$questionSlug", pd.TitleSlug)
+	if t.MarkdownPath != "" {
+		t.MarkdownPath = strings.ReplaceAll(t.MarkdownPath, "$questionID", pd.QuestionFrontendID)
+		t.MarkdownPath = strings.ReplaceAll(t.MarkdownPath, "$questionSlug", pd.TitleSlug)
 	}
 
-	if t.MarkdownTemplate != "" {
-		t.MarkdownTemplate = strings.ReplaceAll(t.MarkdownTemplate, "$questionID", pd.QuestionFrontendID)
-		t.MarkdownTemplate = strings.ReplaceAll(t.MarkdownTemplate, "$questionSlug", pd.TitleSlug)
+	if t.SourceCodePath != "" {
+		t.SourceCodePath = strings.ReplaceAll(t.SourceCodePath, "$questionID", pd.QuestionFrontendID)
+		t.SourceCodePath = strings.ReplaceAll(t.SourceCodePath, "$questionSlug", pd.TitleSlug)
+		t.SourceCodePath = strings.ReplaceAll(t.SourceCodePath, "$submissionID", "1")
 	}
 
-	if t.SourceCodeTemplate != "" {
-		t.SourceCodeTemplate = strings.ReplaceAll(t.SourceCodeTemplate, "$questionID", pd.QuestionFrontendID)
-		t.SourceCodeTemplate = strings.ReplaceAll(t.SourceCodeTemplate, "$questionSlug", pd.TitleSlug)
-		t.SourceCodeTemplate = strings.ReplaceAll(t.SourceCodeTemplate, "$submissionID", "1")
+	md, err := template.ParseFiles(utils.MarkdownTemplatePath)
+	if err != nil {
+		return &t, err
 	}
+	t.MarkdownTemplate = md
 
 	return &t, nil
 }

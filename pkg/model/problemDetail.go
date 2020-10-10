@@ -1,6 +1,7 @@
 package model
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -47,6 +48,7 @@ type ProblemDetail struct {
 	LibraryURL            string                `json:"libraryUrl"`
 	AdminURL              string                `json:"adminUrl"`
 	TypeName              string                `json:"__typename"`
+	ProblemStats          *ProblemStats
 }
 
 // ProblemContributor is the response from leetcode GraphQL API
@@ -181,78 +183,44 @@ func (pd ProblemDetail) ExportDetail(language string) error {
 	return nil
 }
 
-func (pd ProblemDetail) generateMarkdown(t *Template, sourceCodePath string) error {
-	markdown := ""
-
+func (pd ProblemDetail) generateMarkdown(t *FileTemplate, sourceCodePath string) error {
 	pds, err := pd.GetStats()
 	if err != nil {
 		return err
 	}
+	pd.ProblemStats = pds
 
-	var tags []string
-	for _, t := range pd.TopicTags {
-		tags = append(tags, fmt.Sprintf("`%s`", t.Name))
-	}
-
-	markdown += fmt.Sprintf("---\n")
-	markdown += fmt.Sprintf("id: %s\n", pd.QuestionFrontendID)
-	markdown += fmt.Sprintf("title: \"%s\"\n", pd.Title)
-	markdown += fmt.Sprintf(
-		"url: \"%s\"\n",
-		strings.Replace(utils.ProblemURL, "$slug", pd.TitleSlug, 1),
-	)
-	markdown += fmt.Sprintf("tags:\n")
-	for _, tag := range tags {
-		markdown += fmt.Sprintf(
-			"- %s\n",
-			strings.ReplaceAll(
-				strings.ToLower(strings.ReplaceAll(tag, " ", "-")),
-				"`",
-				"\"",
-			),
+	for key, t := range pd.TopicTags {
+		pd.TopicTags[key].Name = strings.ReplaceAll(
+			strings.ToLower(strings.ReplaceAll(t.Name, " ", "-")),
+			"`",
+			"\"",
 		)
 	}
-	markdown += fmt.Sprintf("difficulty: %s\n", pd.Difficulty)
-	markdown += fmt.Sprintf("acceptance: %s\n", pds.AcceptRate)
-	markdown += fmt.Sprintf("total-accepted: \"%d\"\n", pds.TotalAcceptedRaw)
-	markdown += fmt.Sprintf("total-submissions: \"%d\"\n", pds.TotalSubmissionRaw)
-	markdown += fmt.Sprintf("testcase-example: |\n  %s\n", strings.ReplaceAll(pd.SampleTestCase, "\n", "\\n"))
-	markdown += fmt.Sprintf("---\n\n")
-	markdown += fmt.Sprintf("## Problem\n\n")
-	markdown += fmt.Sprintln(pd.Content)
-	markdown += fmt.Sprintf("## Discussion\n\n")
-	markdown += fmt.Sprintf("### Solution\n\n")
-	markdown += fmt.Sprintf("### Complexity Analysis\n\n")
-	markdown += fmt.Sprintf("- Time Complexity:\n\n- Space Complexity:\n")
-
-	if _, err := os.Stat(t.DirTemplate); os.IsNotExist(err) {
-		os.Mkdir(t.DirTemplate, os.ModePerm)
-	}
+	pd.SampleTestCase = strings.ReplaceAll(pd.SampleTestCase, "\n", "\\n")
 
 	f, err := os.Create(
-		fmt.Sprintf(
-			"%s/%s",
-			t.DirTemplate,
-			t.MarkdownTemplate,
-		),
+		fmt.Sprintf(t.MarkdownPath),
 	)
 	if err != nil {
 		return fmt.Errorf(err.Error())
 	}
 
 	defer f.Close()
+	w := bufio.NewWriter(f)
 
-	_, err = f.WriteString(markdown)
+	err = t.MarkdownTemplate.Execute(w, pd)
 	if err != nil {
 		return err
 	}
 
+	w.Flush()
 	f.Sync()
 
 	return nil
 }
 
-func (pd ProblemDetail) generateSourceCode(t *Template, language string) (string, error) {
+func (pd ProblemDetail) generateSourceCode(t *FileTemplate, language string) (string, error) {
 	var supportedLanguage []string
 	for _, codeSnippet := range pd.CodeSnippets {
 		supportedLanguage = append(
@@ -260,23 +228,13 @@ func (pd ProblemDetail) generateSourceCode(t *Template, language string) (string
 			fmt.Sprintf("%s(%s)", codeSnippet.Lang, codeSnippet.LangSlug),
 		)
 		if codeSnippet.Lang == language || codeSnippet.LangSlug == language {
-			if _, err := os.Stat(t.DirTemplate); os.IsNotExist(err) {
-				os.Mkdir(t.DirTemplate, os.ModePerm)
-			}
-
-			t.SourceCodeTemplate = strings.ReplaceAll(
-				t.SourceCodeTemplate,
+			t.SourceCodePath = strings.ReplaceAll(
+				t.SourceCodePath,
 				"$ext",
 				codeSnippet.GetLanguageExt(),
 			)
 
-			f, err := os.Create(
-				fmt.Sprintf(
-					"%s/%s",
-					t.DirTemplate,
-					t.SourceCodeTemplate,
-				),
-			)
+			f, err := os.Create(t.SourceCodePath)
 			if err != nil {
 				return "", fmt.Errorf(err.Error())
 			}
@@ -290,7 +248,7 @@ func (pd ProblemDetail) generateSourceCode(t *Template, language string) (string
 
 			f.Sync()
 
-			return t.SourceCodeTemplate, nil
+			return t.SourceCodePath, nil
 		}
 	}
 
@@ -299,18 +257,17 @@ func (pd ProblemDetail) generateSourceCode(t *Template, language string) (string
 	return "", fmt.Errorf(errMessage)
 }
 
-func (pd ProblemDetail) exportGenerateSummary(t *Template) {
+func (pd ProblemDetail) exportGenerateSummary(t *FileTemplate) {
 	var tags []string
 	for _, tag := range pd.TopicTags {
 		tags = append(tags, tag.Name)
 	}
 
 	fmt.Printf(
-		"| %s | [%s](%s/%s) | %s | %s |",
+		"| %s | [%s](%s) | %s | %s |",
 		pd.QuestionFrontendID,
 		pd.Title,
-		t.DirTemplate,
-		t.MarkdownTemplate,
+		t.MarkdownPath,
 		strings.Join(tags, ", "),
 		pd.Difficulty,
 	)

@@ -1,1 +1,1 @@
-{"dirTemplate": "./","markdownTemplate": "$questionID_$questionSlug.md","sourceCodeTemplate": "submission.$ext"}
+{"markDownPath": "./$questionID_$questionSlug.md","sourceCodePath": "submission.$ext"}
