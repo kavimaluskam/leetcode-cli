@@ -6,7 +6,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/PuerkitoBio/goquery"
 	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
 )
 
@@ -157,12 +156,8 @@ func (pd ProblemDetail) GetStats() (*ProblemStats, error) {
 }
 
 // ExportDetail generate source code in local directory
-func (pd ProblemDetail) ExportDetail(generate bool, language string, summary bool) error {
+func (pd ProblemDetail) ExportDetail(language string, summary bool) error {
 	sourceCodePath := ""
-
-	if generate == false {
-		return pd.exportStdoutDetail()
-	}
 
 	t, err := GetFileTemplate(pd)
 	if err != nil {
@@ -184,35 +179,6 @@ func (pd ProblemDetail) ExportDetail(generate bool, language string, summary boo
 	if summary {
 		pd.exportGenerateSummary(t)
 	}
-
-	return nil
-}
-
-func (pd ProblemDetail) exportStdoutDetail() error {
-	pds, err := pd.GetStats()
-	if err != nil {
-		return err
-	}
-
-	var tags []string
-	for _, t := range pd.TopicTags {
-		tags = append(tags, utils.Yellow(t.Name))
-	}
-
-	p := strings.NewReader(pd.Content)
-	parsedContent, err := goquery.NewDocumentFromReader(p)
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("[%s] %s\n\n", pd.QuestionFrontendID, pd.Title)
-	fmt.Printf("%s\n\n", utils.Gray(strings.Replace(utils.ProblemURL, "$slug", pd.TitleSlug, 1)))
-	fmt.Printf("Tags: %s \n\n", strings.Join(tags, ", "))
-	fmt.Printf("* %s (%s)\n", pd.GetDifficulty(), pds.AcceptRate)
-	fmt.Printf("* Total Accepted:    %d\n", pds.TotalAcceptedRaw)
-	fmt.Printf("* Total Submissions: %d\n", pds.TotalSubmissionRaw)
-	fmt.Printf("* Testcase Example: %s\n\n", strings.ReplaceAll(pd.SampleTestCase, "\n", "\\n"))
-	fmt.Println(parsedContent.Text())
 
 	return nil
 }

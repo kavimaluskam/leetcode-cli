@@ -9,9 +9,7 @@ import (
 func init() {
 	RootCmd.AddCommand(showCmd)
 	showCmd.Flags().IntP("id", "i", 0, "ID of problem to be shown")
-	showCmd.Flags().StringP("title", "t", "", "Title Slug of problem to be shown")
 	showCmd.Flags().BoolP("random", "r", false, "Random choice of problem to be shown")
-	showCmd.Flags().BoolP("generate", "g", false, "Generate source code")
 	showCmd.Flags().StringP("language", "l", "", "Open source code in editor")
 	showCmd.Flags().BoolP("summary", "s", false, "Print out generation summary")
 }
@@ -28,7 +26,6 @@ var showCmd = &cobra.Command{
 func show(cmd *cobra.Command, args []string) error {
 	id, _ := cmd.Flags().GetInt("id")
 	random, _ := cmd.Flags().GetBool("random")
-	generate, _ := cmd.Flags().GetBool("generate")
 	language, _ := cmd.Flags().GetString("language")
 	summary, _ := cmd.Flags().GetBool("summary")
 
@@ -42,7 +39,7 @@ func show(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	err = problemDetail.ExportDetail(generate, language, summary)
+	err = problemDetail.ExportDetail(language, summary)
 	if err != nil {
 		return err
 	}
