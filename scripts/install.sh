@@ -1,8 +1,13 @@
 #/usr/bin
 go build
 
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    sudo mv leetcode-cli /usr/local/bin/leetcode-cli
-else
+OS="`uname`"
+case $OS in
+  'Linux')
     sudo mv leetcode-cli /usr/bin/leetcode-cli
-fi
+    ;;
+  'Darwin')
+    sudo mv leetcode-cli /usr/local/bin/leetcode-cli
+    ;;
+  *) ;;
+esac
