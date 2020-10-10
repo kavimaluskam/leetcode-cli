@@ -156,7 +156,7 @@ func (pd ProblemDetail) GetStats() (*ProblemStats, error) {
 }
 
 // ExportDetail generate source code in local directory
-func (pd ProblemDetail) ExportDetail(language string, summary bool) error {
+func (pd ProblemDetail) ExportDetail(language string) error {
 	sourceCodePath := ""
 
 	t, err := GetFileTemplate(pd)
@@ -176,9 +176,7 @@ func (pd ProblemDetail) ExportDetail(language string, summary bool) error {
 		return err
 	}
 
-	if summary {
-		pd.exportGenerateSummary(t)
-	}
+	pd.exportGenerateSummary(t)
 
 	return nil
 }
