@@ -37,7 +37,7 @@ func (client *Client) GetProblemDetail(id int, titleSlug string, random bool) (*
 		}
 
 		for _, problem := range problemCollection.Problems {
-			if problem.Stat.QuestionID == id {
+			if problem.Stat.FrontendQuestionID == id {
 				titleSlug = problem.Stat.QuestionTitleSlug
 			}
 		}

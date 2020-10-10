@@ -205,7 +205,7 @@ func (pd ProblemDetail) exportStdoutDetail() error {
 		return err
 	}
 
-	fmt.Printf("[%s] %s\n\n", pd.QuestionID, pd.Title)
+	fmt.Printf("[%s] %s\n\n", pd.QuestionFrontendID, pd.Title)
 	fmt.Printf("%s\n\n", utils.Gray(strings.Replace(utils.ProblemURL, "$slug", pd.TitleSlug, 1)))
 	fmt.Printf("Tags: %s \n\n", strings.Join(tags, ", "))
 	fmt.Printf("* %s (%s)\n", pd.GetDifficulty(), pds.AcceptRate)
@@ -230,22 +230,36 @@ func (pd ProblemDetail) generateMarkdown(t *Template, sourceCodePath string) err
 		tags = append(tags, fmt.Sprintf("`%s`", t.Name))
 	}
 
-	markdown += fmt.Sprintf("# [%s] %s\n\n", pd.QuestionID, pd.Title)
+	markdown += fmt.Sprintf("---\n")
+	markdown += fmt.Sprintf("id: %s\n", pd.QuestionFrontendID)
+	markdown += fmt.Sprintf("title: \"%s\"\n", pd.Title)
 	markdown += fmt.Sprintf(
-		"<%s>\n\n",
+		"url: \"%s\"\n",
 		strings.Replace(utils.ProblemURL, "$slug", pd.TitleSlug, 1),
 	)
-	markdown += fmt.Sprintf("- Tags: %s\n\n", strings.Join(tags, ", "))
-	markdown += fmt.Sprintf("- Difficulty: %s\n\n", pd.Difficulty)
-	if sourceCodePath != "" {
-		markdown += fmt.Sprintf("- Source Code: [./%s](./%s)\n\n", sourceCodePath, sourceCodePath)
+	markdown += fmt.Sprintf("tags:\n")
+	for _, tag := range tags {
+		markdown += fmt.Sprintf(
+			"- %s\n",
+			strings.ReplaceAll(
+				strings.ToLower(strings.ReplaceAll(tag, " ", "-")),
+				"`",
+				"\"",
+			),
+		)
 	}
-	markdown += fmt.Sprintf("- Acceptance: %s\n\n", pds.AcceptRate)
-	markdown += fmt.Sprintf("- Total Accepted: %d\n\n", pds.TotalAcceptedRaw)
-	markdown += fmt.Sprintf("- Total Submissions: %d\n\n", pds.TotalSubmissionRaw)
-	markdown += fmt.Sprintf("- Testcase Example: %s\n\n", strings.ReplaceAll(pd.SampleTestCase, "\n", "\\n"))
-	markdown += fmt.Sprintf("## Description\n\n")
+	markdown += fmt.Sprintf("difficulty: %s\n", pd.Difficulty)
+	markdown += fmt.Sprintf("acceptance: %s\n", pds.AcceptRate)
+	markdown += fmt.Sprintf("total-accepted: \"%d\"\n", pds.TotalAcceptedRaw)
+	markdown += fmt.Sprintf("total-submissions: \"%d\"\n", pds.TotalSubmissionRaw)
+	markdown += fmt.Sprintf("testcase-example: |\n  %s\n", strings.ReplaceAll(pd.SampleTestCase, "\n", "\\n"))
+	markdown += fmt.Sprintf("---\n\n")
+	markdown += fmt.Sprintf("## Problem\n\n")
 	markdown += fmt.Sprintln(pd.Content)
+	markdown += fmt.Sprintf("## Discussion\n\n")
+	markdown += fmt.Sprintf("### Solution\n\n")
+	markdown += fmt.Sprintf("### Complexity Analysis\n\n")
+	markdown += fmt.Sprintf("- Time Complexity:\n\n- Space Complexity:\n")
 
 	if _, err := os.Stat(t.DirTemplate); os.IsNotExist(err) {
 		os.Mkdir(t.DirTemplate, os.ModePerm)
@@ -328,10 +342,11 @@ func (pd ProblemDetail) exportGenerateSummary(t *Template) {
 	}
 
 	fmt.Printf(
-		"| %s | [%s](%s) | %s | %s |",
-		pd.QuestionID,
+		"| %s | [%s](%s/%s) | %s | %s |",
+		pd.QuestionFrontendID,
 		pd.Title,
 		t.DirTemplate,
+		t.MarkdownTemplate,
 		strings.Join(tags, ", "),
 		pd.Difficulty,
 	)
