@@ -4,3 +4,4 @@ mkdir -p ~/.lc/leetcode
 
 cp scripts/template.json ~/.lc/leetcode
 cp scripts/user.json ~/.lc/leetcode
+cp scripts/template.md ~/.lc/leetcode

@@ -21,8 +21,9 @@ const (
 
 // Local Path for configuration
 var (
-	AuthConfigPath     = fmt.Sprintf("%s/.lc/leetcode/user.json", os.Getenv("HOME"))
-	TemplateConfigPath = fmt.Sprintf("%s/.lc/leetcode/template.json", os.Getenv("HOME"))
+	AuthConfigPath       = fmt.Sprintf("%s/.lc/leetcode/user.json", os.Getenv("HOME"))
+	TemplateConfigPath   = fmt.Sprintf("%s/.lc/leetcode/template.json", os.Getenv("HOME"))
+	MarkdownTemplatePath = fmt.Sprintf("%s/.lc/leetcode/template.md", os.Getenv("HOME"))
 )
 
 // GraphQL related query, operation string

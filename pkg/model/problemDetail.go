@@ -1,12 +1,12 @@
 package model
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
 
-	"github.com/PuerkitoBio/goquery"
 	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
 )
 
@@ -48,6 +48,7 @@ type ProblemDetail struct {
 	LibraryURL            string                `json:"libraryUrl"`
 	AdminURL              string                `json:"adminUrl"`
 	TypeName              string                `json:"__typename"`
+	ProblemStats          *ProblemStats
 }
 
 // ProblemContributor is the response from leetcode GraphQL API
@@ -157,12 +158,8 @@ func (pd ProblemDetail) GetStats() (*ProblemStats, error) {
 }
 
 // ExportDetail generate source code in local directory
-func (pd ProblemDetail) ExportDetail(generate bool, language string, summary bool) error {
+func (pd ProblemDetail) ExportDetail(language string) error {
 	sourceCodePath := ""
-
-	if generate == false {
-		return pd.exportStdoutDetail()
-	}
 
 	t, err := GetFileTemplate(pd)
 	if err != nil {
@@ -181,100 +178,49 @@ func (pd ProblemDetail) ExportDetail(generate bool, language string, summary boo
 		return err
 	}
 
-	if summary {
-		pd.exportGenerateSummary(t)
-	}
+	pd.exportGenerateSummary(t)
 
 	return nil
 }
 
-func (pd ProblemDetail) exportStdoutDetail() error {
+func (pd ProblemDetail) generateMarkdown(t *FileTemplate, sourceCodePath string) error {
 	pds, err := pd.GetStats()
 	if err != nil {
 		return err
 	}
+	pd.ProblemStats = pds
 
-	var tags []string
-	for _, t := range pd.TopicTags {
-		tags = append(tags, utils.Yellow(t.Name))
+	for key, t := range pd.TopicTags {
+		pd.TopicTags[key].Name = strings.ReplaceAll(
+			strings.ToLower(strings.ReplaceAll(t.Name, " ", "-")),
+			"`",
+			"\"",
+		)
 	}
-
-	p := strings.NewReader(pd.Content)
-	parsedContent, err := goquery.NewDocumentFromReader(p)
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("[%s] %s\n\n", pd.QuestionID, pd.Title)
-	fmt.Printf("%s\n\n", utils.Gray(strings.Replace(utils.ProblemURL, "$slug", pd.TitleSlug, 1)))
-	fmt.Printf("Tags: %s \n\n", strings.Join(tags, ", "))
-	fmt.Printf("* %s (%s)\n", pd.GetDifficulty(), pds.AcceptRate)
-	fmt.Printf("* Total Accepted:    %d\n", pds.TotalAcceptedRaw)
-	fmt.Printf("* Total Submissions: %d\n", pds.TotalSubmissionRaw)
-	fmt.Printf("* Testcase Example: %s\n\n", strings.ReplaceAll(pd.SampleTestCase, "\n", "\\n"))
-	fmt.Println(parsedContent.Text())
-
-	return nil
-}
-
-func (pd ProblemDetail) generateMarkdown(t *Template, sourceCodePath string) error {
-	markdown := ""
-
-	pds, err := pd.GetStats()
-	if err != nil {
-		return err
-	}
-
-	var tags []string
-	for _, t := range pd.TopicTags {
-		tags = append(tags, fmt.Sprintf("`%s`", t.Name))
-	}
-
-	markdown += fmt.Sprintf("# [%s] %s\n\n", pd.QuestionID, pd.Title)
-	markdown += fmt.Sprintf(
-		"<%s>\n\n",
-		strings.Replace(utils.ProblemURL, "$slug", pd.TitleSlug, 1),
-	)
-	markdown += fmt.Sprintf("- Tags: %s\n\n", strings.Join(tags, ", "))
-	markdown += fmt.Sprintf("- Difficulty: %s\n\n", pd.Difficulty)
-	if sourceCodePath != "" {
-		markdown += fmt.Sprintf("- Source Code: [./%s](./%s)\n\n", sourceCodePath, sourceCodePath)
-	}
-	markdown += fmt.Sprintf("- Acceptance: %s\n\n", pds.AcceptRate)
-	markdown += fmt.Sprintf("- Total Accepted: %d\n\n", pds.TotalAcceptedRaw)
-	markdown += fmt.Sprintf("- Total Submissions: %d\n\n", pds.TotalSubmissionRaw)
-	markdown += fmt.Sprintf("- Testcase Example: %s\n\n", strings.ReplaceAll(pd.SampleTestCase, "\n", "\\n"))
-	markdown += fmt.Sprintf("## Description\n\n")
-	markdown += fmt.Sprintln(pd.Content)
-
-	if _, err := os.Stat(t.DirTemplate); os.IsNotExist(err) {
-		os.Mkdir(t.DirTemplate, os.ModePerm)
-	}
+	pd.SampleTestCase = strings.ReplaceAll(pd.SampleTestCase, "\n", "\\n")
 
 	f, err := os.Create(
-		fmt.Sprintf(
-			"%s/%s",
-			t.DirTemplate,
-			t.MarkdownTemplate,
-		),
+		fmt.Sprintf(t.MarkdownPath),
 	)
 	if err != nil {
 		return fmt.Errorf(err.Error())
 	}
 
 	defer f.Close()
+	w := bufio.NewWriter(f)
 
-	_, err = f.WriteString(markdown)
+	err = t.MarkdownTemplate.Execute(w, pd)
 	if err != nil {
 		return err
 	}
 
+	w.Flush()
 	f.Sync()
 
 	return nil
 }
 
-func (pd ProblemDetail) generateSourceCode(t *Template, language string) (string, error) {
+func (pd ProblemDetail) generateSourceCode(t *FileTemplate, language string) (string, error) {
 	var supportedLanguage []string
 	for _, codeSnippet := range pd.CodeSnippets {
 		supportedLanguage = append(
@@ -282,23 +228,13 @@ func (pd ProblemDetail) generateSourceCode(t *Template, language string) (string
 			fmt.Sprintf("%s(%s)", codeSnippet.Lang, codeSnippet.LangSlug),
 		)
 		if codeSnippet.Lang == language || codeSnippet.LangSlug == language {
-			if _, err := os.Stat(t.DirTemplate); os.IsNotExist(err) {
-				os.Mkdir(t.DirTemplate, os.ModePerm)
-			}
-
-			t.SourceCodeTemplate = strings.ReplaceAll(
-				t.SourceCodeTemplate,
+			t.SourceCodePath = strings.ReplaceAll(
+				t.SourceCodePath,
 				"$ext",
 				codeSnippet.GetLanguageExt(),
 			)
 
-			f, err := os.Create(
-				fmt.Sprintf(
-					"%s/%s",
-					t.DirTemplate,
-					t.SourceCodeTemplate,
-				),
-			)
+			f, err := os.Create(t.SourceCodePath)
 			if err != nil {
 				return "", fmt.Errorf(err.Error())
 			}
@@ -312,7 +248,7 @@ func (pd ProblemDetail) generateSourceCode(t *Template, language string) (string
 
 			f.Sync()
 
-			return t.SourceCodeTemplate, nil
+			return t.SourceCodePath, nil
 		}
 	}
 
@@ -321,7 +257,7 @@ func (pd ProblemDetail) generateSourceCode(t *Template, language string) (string
 	return "", fmt.Errorf(errMessage)
 }
 
-func (pd ProblemDetail) exportGenerateSummary(t *Template) {
+func (pd ProblemDetail) exportGenerateSummary(t *FileTemplate) {
 	var tags []string
 	for _, tag := range pd.TopicTags {
 		tags = append(tags, tag.Name)
@@ -329,9 +265,9 @@ func (pd ProblemDetail) exportGenerateSummary(t *Template) {
 
 	fmt.Printf(
 		"| %s | [%s](%s) | %s | %s |",
-		pd.QuestionID,
+		pd.QuestionFrontendID,
 		pd.Title,
-		t.DirTemplate,
+		t.MarkdownPath,
 		strings.Join(tags, ", "),
 		pd.Difficulty,
 	)

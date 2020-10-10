@@ -56,7 +56,7 @@ func (client *Client) GetProblemCollection(category string, query string, name s
 
 		for _, problem := range problemCollection.Problems {
 			for _, queryQuestionID := range problemIDList {
-				if problem.Stat.QuestionID == queryQuestionID {
+				if problem.Stat.FrontendQuestionID == queryQuestionID {
 					queriedProblems = append(queriedProblems, problem)
 				}
 			}

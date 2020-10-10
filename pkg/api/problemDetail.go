@@ -16,7 +16,8 @@ type ProblemDetailCollection struct {
 }
 
 // GetProblemDetail is the graphql query function fetching leetcode Individual Problem
-func (client *Client) GetProblemDetail(id int, titleSlug string, random bool) (*model.ProblemDetail, error) {
+func (client *Client) GetProblemDetail(id int, random bool) (*model.ProblemDetail, error) {
+	var titleSlug string
 	var problemDetailCollection ProblemDetailCollection
 
 	if random { // randomly pick problem title slug
@@ -30,14 +31,14 @@ func (client *Client) GetProblemDetail(id int, titleSlug string, random bool) (*
 
 		titleSlug = problemCollection.Problems[i].Stat.QuestionTitleSlug
 
-	} else if titleSlug == "" && id != 0 { // pick title slug by id
+	} else { // pick title slug by id
 		problemCollection, err := client.GetProblemCollection("all", "", "", "all", "all")
 		if err != nil {
 			return nil, err
 		}
 
 		for _, problem := range problemCollection.Problems {
-			if problem.Stat.QuestionID == id {
+			if problem.Stat.FrontendQuestionID == id {
 				titleSlug = problem.Stat.QuestionTitleSlug
 			}
 		}

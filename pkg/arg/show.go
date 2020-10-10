@@ -12,36 +12,18 @@ func Show(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	title, err := cmd.Flags().GetString("title")
-	if err != nil {
-		return err
-	}
 	random, err := cmd.Flags().GetBool("random")
 	if err != nil {
 		return err
 	}
 
-	if id == 0 && title == "" && !random {
-		return fmt.Errorf("invalid arguments: either 'id', 'title', 'random' should be applied")
+	if id == 0 && !random {
+		return fmt.Errorf("invalid arguments: either 'id', 'random' should be applied")
 	}
 
-	generate, err := cmd.Flags().GetBool("generate")
+	_, err = cmd.Flags().GetString("language")
 	if err != nil {
 		return err
-	}
-	summary, err := cmd.Flags().GetBool("summary")
-	if err != nil {
-		return err
-	}
-	if summary && generate == false {
-		return fmt.Errorf("invalid arguments: 'summary' should only be applied with 'generate'")
-	}
-	language, err := cmd.Flags().GetString("language")
-	if err != nil {
-		return err
-	}
-	if language != "" && generate == false {
-		return fmt.Errorf("invalid arguments: 'language' should only be applied with 'generate'")
 	}
 
 	return nil
