@@ -36,7 +36,7 @@ func submit(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	problemDetail, err := client.GetProblemDetail(id, "", false)
+	problemDetail, err := client.GetProblemDetail(id, false)
 	if err != nil {
 		return err
 	}

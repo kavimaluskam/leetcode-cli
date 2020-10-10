@@ -27,7 +27,6 @@ var showCmd = &cobra.Command{
 
 func show(cmd *cobra.Command, args []string) error {
 	id, _ := cmd.Flags().GetInt("id")
-	title, _ := cmd.Flags().GetString("title")
 	random, _ := cmd.Flags().GetBool("random")
 	generate, _ := cmd.Flags().GetBool("generate")
 	language, _ := cmd.Flags().GetString("language")
@@ -38,7 +37,7 @@ func show(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	problemDetail, err := client.GetProblemDetail(id, title, random)
+	problemDetail, err := client.GetProblemDetail(id, random)
 	if err != nil {
 		return err
 	}
