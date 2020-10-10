@@ -2,6 +2,10 @@
 
 A cli tool to fight and organize leetcode questions, inspired by [skygragon/leetcode-cli](https://github.com/skygragon/leetcode-cli)
 
+## Install
+
+`go get github.com/kavimaluskam/leetcode-cli`
+
 ## Feature
 
 - `list`: querying leetcode questions with attributes
@@ -10,6 +14,7 @@ A cli tool to fight and organize leetcode questions, inspired by [skygragon/leet
 - `user`: leetcode authentication
 
 ## TODOs
+
 - testing
 - global spinner
 - config management
