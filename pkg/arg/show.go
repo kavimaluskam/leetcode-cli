@@ -21,10 +21,6 @@ func Show(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("invalid arguments: either 'id', 'random' should be applied")
 	}
 
-	_, err = cmd.Flags().GetBool("summary")
-	if err != nil {
-		return err
-	}
 	_, err = cmd.Flags().GetString("language")
 	if err != nil {
 		return err
