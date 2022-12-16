@@ -3,7 +3,7 @@ package arg
 import (
 	"fmt"
 
-	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
+	"github.com/ckidckidckid/leetcode-cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
 

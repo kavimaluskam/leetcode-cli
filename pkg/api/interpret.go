@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/kavimaluskam/leetcode-cli/pkg/model"
-	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
+	"github.com/ckidckidckid/leetcode-cli/pkg/model"
+	"github.com/ckidckidckid/leetcode-cli/pkg/utils"
 	"github.com/kyokomi/emoji"
 )
 
@@ -60,7 +60,7 @@ func (c *Client) InterpretCode(pd *model.ProblemDetail, fp string, dataInput str
 		return err
 	}
 
-	file, err := ioutil.ReadFile(fp)
+	file, err := os.ReadFile(fp)
 	if err != nil {
 		return err
 	}

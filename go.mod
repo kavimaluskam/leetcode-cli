@@ -1,4 +1,4 @@
-module github.com/kavimaluskam/leetcode-cli
+module github.com/ckidckidckid/leetcode-cli
 
 go 1.14
 

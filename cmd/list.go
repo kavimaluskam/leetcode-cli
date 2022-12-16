@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/kavimaluskam/leetcode-cli/pkg/api"
-	"github.com/kavimaluskam/leetcode-cli/pkg/arg"
+	"github.com/ckidckidckid/leetcode-cli/pkg/api"
+	"github.com/ckidckidckid/leetcode-cli/pkg/arg"
 	"github.com/spf13/cobra"
 )
 

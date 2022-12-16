@@ -4,7 +4,7 @@ A cli tool to fight and organize leetcode questions, inspired by [skygragon/leet
 
 ## Install
 
-`go get github.com/kavimaluskam/leetcode-cli`
+`go get github.com/ckidckidckid/leetcode-cli`
 
 ## Feature
 

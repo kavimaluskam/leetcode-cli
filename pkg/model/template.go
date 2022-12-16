@@ -2,11 +2,11 @@ package model
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 	"strings"
 	"text/template"
 
-	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
+	"github.com/ckidckidckid/leetcode-cli/pkg/utils"
 )
 
 // Template is the config of leetcode stored in local
@@ -20,7 +20,7 @@ type FileTemplate struct {
 func GetFileTemplate(pd ProblemDetail) (*FileTemplate, error) {
 	t := FileTemplate{}
 
-	file, err := ioutil.ReadFile(utils.TemplateConfigPath)
+	file, err := os.ReadFile(utils.TemplateConfigPath)
 	if err != nil {
 		return &t, err
 	}

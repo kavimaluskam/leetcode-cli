@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
+	"github.com/ckidckidckid/leetcode-cli/pkg/utils"
 )
 
 // ClientOption represents an argument to NewClient

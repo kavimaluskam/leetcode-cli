@@ -5,8 +5,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/kavimaluskam/leetcode-cli/pkg/model"
-	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
+	"github.com/ckidckidckid/leetcode-cli/pkg/model"
+	"github.com/ckidckidckid/leetcode-cli/pkg/utils"
 )
 
 // ProblemDetailCollection is the response from leetcode GraphQL API

@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/kavimaluskam/leetcode-cli/pkg/api"
-	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
+	"github.com/ckidckidckid/leetcode-cli/pkg/api"
+	"github.com/ckidckidckid/leetcode-cli/pkg/utils"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 )

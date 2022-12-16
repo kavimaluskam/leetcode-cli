@@ -12,8 +12,8 @@ import (
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/input"
 
-	"github.com/kavimaluskam/leetcode-cli/pkg/model"
-	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
+	"github.com/ckidckidckid/leetcode-cli/pkg/model"
+	"github.com/ckidckidckid/leetcode-cli/pkg/utils"
 )
 
 // Auth is the config of leetcode stored in local
@@ -26,7 +26,7 @@ type Auth struct {
 
 // GetAuthCredentials retrieve auth information from local config
 func GetAuthCredentials() (*Auth, error) {
-	file, err := ioutil.ReadFile(utils.AuthConfigPath)
+	file, err := os.ReadFile(utils.AuthConfigPath)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (a *Auth) SetAuthCredentials() error {
 		return fmt.Errorf("Error on processing authentication json: %s", err.Error())
 	}
 
-	err = ioutil.WriteFile(utils.AuthConfigPath, file, os.ModePerm)
+	err = os.WriteFile(utils.AuthConfigPath, file, os.ModePerm)
 	if err != nil {
 		return err
 	}

@@ -3,8 +3,8 @@ package api
 import (
 	"strings"
 
-	"github.com/kavimaluskam/leetcode-cli/pkg/model"
-	"github.com/kavimaluskam/leetcode-cli/pkg/utils"
+	"github.com/ckidckidckid/leetcode-cli/pkg/model"
+	"github.com/ckidckidckid/leetcode-cli/pkg/utils"
 )
 
 // ProblemCollection is the response from leetcode API concerning problem set

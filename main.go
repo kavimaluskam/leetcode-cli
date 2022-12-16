@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/kavimaluskam/leetcode-cli/cmd"
+	"github.com/ckidckidckid/leetcode-cli/cmd"
 	"github.com/spf13/cobra"
 )
 
