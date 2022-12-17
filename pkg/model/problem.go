@@ -24,10 +24,10 @@ type Problem struct {
 	Difficulty struct {
 		Level int `json:"level"`
 	} `json:"difficulty"`
-	PaidOnly  bool `json:"paid_only"`
-	IsFavor   bool `json:"is_favor"`
-	Frequency int  `json:"frequency"`
-	Progress  int  `json:"progress"`
+	PaidOnly  bool    `json:"paid_only"`
+	IsFavor   bool    `json:"is_favor"`
+	Frequency float64 `json:"frequency"`
+	Progress  float64 `json:"progress"`
 }
 
 // GetDifficulty is a mapper function from problem Difficulty level to string

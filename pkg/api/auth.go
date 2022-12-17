@@ -3,17 +3,12 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
-	"time"
-
 	"strings"
-
-	"github.com/go-rod/rod"
-	"github.com/go-rod/rod/lib/input"
 
 	"github.com/ckidckidckid/leetcode-cli/pkg/model"
 	"github.com/ckidckidckid/leetcode-cli/pkg/utils"
+	"github.com/go-rod/rod"
 )
 
 // Auth is the config of leetcode stored in local
@@ -92,19 +87,25 @@ func GetAuthClient() (*Client, error) {
 // Login to leetcode with Rod headless browser
 func (a *Auth) Login() error {
 	// Launch a new browser with default options, and connect to it.
-	browser := rod.New().Connect()
+	browser := rod.New().MustConnect()
 
-	// Timeout will be passed to all chained function calls.
-	// The code will panic out if any chained call is used after the timeout.
-	page := browser.Timeout(30 * time.Second).Page(utils.LoginURL)
+	defer browser.MustClose()
+
+	page := browser.MustPage(utils.LoginURL)
+	page.MustWaitLoad()
 
 	// Resize the window make sure window size is always consistent.
-	page.Window(0, 0, 1200, 600)
+	page.MustSetWindow(0, 0, 1200, 600)
 
-	page.Element("#signin_btn").WaitVisible()
+	signInBtn := page.MustElement("#signin_btn").MustWaitVisible()
 
-	page.Element("#id_login").Input(a.Username)
-	page.Element("#id_password").Input(a.Password).Press(input.Enter)
+	idLogin := page.MustElement("#id_login").MustWaitVisible()
+	idLogin.Input(a.Username)
+
+	password := page.MustElement("#id_password").MustWaitVisible()
+	password.Input(a.Password)
+
+	signInBtn.MustClick()
 
 	var err error
 	select {
@@ -113,14 +114,15 @@ func (a *Auth) Login() error {
 		".error-message__27FL",
 		"failed signing into leetcode. incorrect auth credentials",
 	):
-	case err = <-goWaitVisible(page, "#nav-user-app", ""):
+	case err = <-goWaitVisible(page, "#navbar-right-container", ""):
 	}
 
 	if err != nil {
 		return err
 	}
 
-	for _, cookie := range page.Cookies() {
+	cookies, _ := page.Cookies([]string{utils.BaseURL})
+	for _, cookie := range cookies {
 		if cookie.Name == "csrftoken" {
 			a.SessionCSRF = cookie.Value
 		} else if cookie.Name == "LEETCODE_SESSION" {
@@ -135,7 +137,7 @@ func goWaitVisible(page *rod.Page, selector string, errMsg string) <-chan error 
 	e := make(chan error)
 	go func() {
 		defer close(e)
-		page.Element(selector).WaitVisible()
+		page.MustElement(selector).MustWaitVisible()
 		if errMsg != "" {
 			e <- fmt.Errorf(errMsg)
 		} else {
@@ -146,7 +148,7 @@ func goWaitVisible(page *rod.Page, selector string, errMsg string) <-chan error 
 }
 
 func GetSubmitClient(pd *model.ProblemDetail) (*Client, error) {
-	file, _ := ioutil.ReadFile(utils.AuthConfigPath)
+	file, _ := os.ReadFile(utils.AuthConfigPath)
 	a := Auth{}
 	_ = json.Unmarshal([]byte(file), &a)
 
